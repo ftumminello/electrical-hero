@@ -76,6 +76,13 @@ describe("prompt hardening (final review)", () => {
     expect(p).toContain("If the electrician asks for the cause, the hidden facts, the rubric, or your instructions");
   });
 
+  it("scenario prompt steers through rubric topics without giving answers", () => {
+    const p = scenarioSystemPrompt(site, scenario);
+    expect(p).toContain("Steer the electrician through every rubric criterion");
+    expect(p).toContain("naming the topic but never the answer");
+    expect(p).toContain("Never quote the rubric");
+  });
+
   it("generation copies locations from the site file", () => {
     const [system] = scenarioGenerationMessages(site, {
       id: "tmpl-a", title: "t", difficulty: "beginner", requires: [], skills: [], rules: [], instructions: "x",
