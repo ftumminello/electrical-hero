@@ -2,7 +2,7 @@
   "name": "@electrical-hero/native",
   "version": "0.0.0",
   "private": true,
-  "main": "index.ts",
+  "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
     "dev": "expo start",
@@ -11,14 +11,36 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@electrical-hero/core": "workspace:*",
+    "@electrical-hero/design-system": "workspace:*",
     "@electrical-hero/shared": "workspace:*",
+    "@expo-google-fonts/barlow-condensed": "^0.4.1",
+    "@expo-google-fonts/inter": "^0.4.2",
+    "@expo-google-fonts/jetbrains-mono": "^0.4.1",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "^57.0.27",
+    "expo-constants": "~57.0.21",
+    "expo-font": "~57.0.4",
+    "expo-linking": "~57.0.12",
+    "expo-router": "~57.0.25",
+    "expo-splash-screen": "~57.0.9",
     "expo-status-bar": "~57.0.1",
+    "expo-system-ui": "~57.0.4",
+    "lucide-react-native": "^1.52.0",
+    "nativewind": "4.2.7",
     "react": "19.2.3",
-    "react-native": "0.86.3"
+    "react-native": "0.86.3",
+    "react-native-css-interop": "0.2.7",
+    "react-native-reanimated": "4.5.1",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "react-native-svg": "15.15.4",
+    "react-native-worklets": "0.10.1"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "tailwindcss": "^3.4.19",
     "typescript": "^6.0.3"
   }
 }

@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface-100 text-ink antialiased type-body;
+  }
+
+  /* Every interactive element shows a 2px focus-ring outline. */
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-focus-ring;
+  }
+}
