@@ -18,18 +18,6 @@ const nextConfig: NextConfig = {
       fallback: [],
     };
   },
-  async redirects() {
-    // In production, /admin on any other host goes to the admin subdomain. Off in `next dev` so localhost:5173/admin works.
-    if (process.env.NODE_ENV !== "production") return [];
-    return [
-      {
-        source: "/admin/:path*",
-        missing: [{ type: "host", value: ADMIN_HOST }],
-        destination: `https://${ADMIN_HOST}/`,
-        permanent: false,
-      },
-    ];
-  },
 };
 
 export default nextConfig;
