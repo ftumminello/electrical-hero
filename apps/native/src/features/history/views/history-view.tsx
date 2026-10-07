@@ -13,7 +13,7 @@ export function HistoryView() {
   return (
     <Screen>
       <View className="gap-2">
-        <TextLink href="/account">Back to your account</TextLink>
+        <TextLink href="/account" back>Back to your account</TextLink>
         <Text variant="eyebrow" className="text-ink-muted">
           Your track record
         </Text>

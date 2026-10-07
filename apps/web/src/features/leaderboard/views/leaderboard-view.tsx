@@ -23,7 +23,7 @@ export function LeaderboardView() {
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-8 md:px-6 md:py-12">
       <div className="flex flex-col gap-2">
-        <TextLink href="/account">Back to your account</TextLink>
+        <TextLink href="/account" back>Back to your account</TextLink>
         <Text variant="eyebrow" className="text-ink-muted">
           {companyName ?? "Your company"}
         </Text>

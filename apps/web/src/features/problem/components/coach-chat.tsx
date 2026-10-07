@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ChatMessage, SessionMode } from "@electrical-hero/shared";
+import { Lightbulb } from "@electrical-hero/core/icons";
 import { Button } from "@electrical-hero/core/shared/button";
 import { ChatBubble } from "@electrical-hero/core/shared/chat-bubble";
 import { Markdown } from "@electrical-hero/core/shared/markdown";
@@ -11,6 +12,8 @@ import { TextArea } from "@electrical-hero/core/shared/text-area";
 import { PASS_MESSAGE, messageSpeaker } from "@electrical-hero/core/lib/training";
 import { useSpeechToText } from "../hooks/use-speech-to-text";
 import { VoiceInputButton } from "./voice-input-button";
+
+const SHOW_ME_HOW_URL = "https://stonebyte.bid";
 
 type CoachChatProps = {
   mode: SessionMode;
@@ -113,6 +116,19 @@ export function CoachChat({
                   <Text className="whitespace-pre-wrap">{text}</Text>
                 ) : (
                   <Markdown content={text} />
+                )}
+                {label === "Dispatch" && (
+                  <div className="mt-2 flex justify-end">
+                    <a
+                      href={SHOW_ME_HOW_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded-sm text-neutral-blue type-small hover:underline"
+                    >
+                      <Lightbulb aria-hidden size={14} strokeWidth={2} />
+                      Show me how
+                    </a>
+                  </div>
                 )}
               </ChatBubble>
             );

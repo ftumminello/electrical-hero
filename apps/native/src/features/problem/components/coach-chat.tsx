@@ -1,13 +1,17 @@
 import { useRef, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { Linking, Pressable, ScrollView, View } from "react-native";
 import type { ChatMessage, SessionMode } from "@electrical-hero/shared";
 import { PASS_MESSAGE, messageSpeaker } from "@electrical-hero/core/lib/training";
+import { Lightbulb } from "@electrical-hero/core/icons";
+import { useTheme } from "@electrical-hero/core/providers/theme-provider";
 import { Button } from "@electrical-hero/core/shared/button";
 import { ChatBubble } from "@electrical-hero/core/shared/chat-bubble";
 import { Markdown } from "@electrical-hero/core/shared/markdown";
 import { StatusBadge } from "@electrical-hero/core/shared/status-badge";
 import { Text } from "@electrical-hero/core/shared/text";
 import { TextArea } from "@electrical-hero/core/shared/text-area";
+
+const SHOW_ME_HOW_URL = "https://stonebyte.bid";
 
 type CoachChatProps = {
   mode: SessionMode;
@@ -34,6 +38,7 @@ export function CoachChat({
   gradeError,
   onFinish,
 }: CoachChatProps) {
+  const { colors } = useTheme();
   const [draft, setDraft] = useState("");
   const [hint, setHint] = useState<string | null>(null);
   const conversationRef = useRef<ScrollView>(null);
@@ -98,6 +103,18 @@ export function CoachChat({
             return (
               <ChatBubble key={message.id} from={message.role === "user" ? "learner" : "tutor"} label={label}>
                 {message.role === "user" ? <Text>{text}</Text> : <Markdown content={text} />}
+                {label === "Dispatch" && (
+                  <Pressable
+                    accessibilityRole="link"
+                    onPress={() => void Linking.openURL(SHOW_ME_HOW_URL)}
+                    className="mt-2 min-h-11 flex-row items-center gap-1 self-end"
+                  >
+                    <Lightbulb size={14} strokeWidth={2} color={colors["neutral-blue"]} />
+                    <Text variant="small" className="text-neutral-blue">
+                      Show me how
+                    </Text>
+                  </Pressable>
+                )}
               </ChatBubble>
             );
           })}
