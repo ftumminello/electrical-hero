@@ -1,13 +1,11 @@
 import type { Difficulty, ScenarioTemplateSummary } from "@electrical-hero/shared";
-import { parseFrontmatter } from "./frontmatter";
+import { asList, parseFrontmatter } from "./frontmatter";
 
 export interface ScenarioTemplate extends ScenarioTemplateSummary {
   instructions: string;
 }
 
 const DIFFICULTIES: readonly string[] = ["beginner", "intermediate", "advanced"];
-
-const asList = (v: string | string[] | undefined): string[] => (Array.isArray(v) ? v : v ? [v] : []);
 
 export function parseTemplate(markdown: string): ScenarioTemplate {
   const { data, body } = parseFrontmatter(markdown);
@@ -24,6 +22,7 @@ export function parseTemplate(markdown: string): ScenarioTemplate {
     requires: asList(data.requires),
     skills: asList(data.skills),
     rules: asList(data.rules),
+    protocols: asList(data.protocols),
     instructions: body.trim(),
   };
 }

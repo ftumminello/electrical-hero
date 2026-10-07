@@ -46,6 +46,8 @@ export interface ScenarioTemplateSummary {
   requires: string[];
   skills: string[];
   rules: string[];
+  /** Safety protocol ids this scenario type exercises. */
+  protocols: string[];
 }
 
 export interface CreateScenarioRequest {
@@ -113,3 +115,41 @@ export type ChatStreamEvent =
   | { event: "delta"; data: { text: string } }
   | { event: "done"; data: { messageId: string } }
   | { event: "error"; data: { error: string } };
+
+export interface SafetyProtocolSummary {
+  id: string;
+  title: string;
+  category: string;
+  /** Account features the site must have; empty = applies everywhere. */
+  appliesTo: string[];
+  /** Company rule ids, e.g. R-LOTO-01. */
+  rules: string[];
+  /** 29 CFR sections, fetchable from GET /regulations/cfr/29/{section}. */
+  osha: string[];
+  /** NFPA 70E article references (cited, never quoted). */
+  nfpa70e: string[];
+}
+
+export interface SafetyProtocol extends SafetyProtocolSummary {
+  markdown: string;
+}
+
+export interface CodeSpec {
+  id: string;
+  name: string;
+  necEdition: string;
+  nextEdition: string | null;
+  authority: string;
+  amendments: string;
+  markdown: string;
+}
+
+/** OSHA regulation text fetched live from eCFR (public domain). */
+export interface Regulation {
+  section: string;
+  heading: string;
+  text: string;
+  sourceUrl: string;
+  /** eCFR "up to date as of" date for title 29. */
+  asOf: string;
+}

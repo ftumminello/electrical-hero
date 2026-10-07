@@ -6,4 +6,6 @@ put() { pnpm exec wrangler r2 object put "$1" --file "$2" --content-type "text/m
 for f in seed/clients/*.md; do put "eh-client-configs/$(basename "$f")" "$f"; done
 for f in seed/rules/co-kestrel/*.md; do put "eh-company-rules/co-kestrel/$(basename "$f")" "$f"; done
 for f in seed/templates/*.md; do put "eh-scenario-templates/$(basename "$f")" "$f"; done
+for f in seed/protocols/*.md; do put "eh-safety-protocols/$(basename "$f")" "$f"; done
+for f in seed/code-specs/*.md; do put "eh-code-specs/$(basename "$f")" "$f"; done
 pnpm exec wrangler d1 execute electrical-hero --remote --file seed/seed.sql

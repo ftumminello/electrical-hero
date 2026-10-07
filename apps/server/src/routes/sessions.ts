@@ -15,7 +15,7 @@ import {
   newMessage,
   now,
 } from "../data/db";
-import { loadSite } from "../data/content";
+import { loadReference, loadSite } from "../data/content";
 import { scenarioHidden, toSessionDetail, type ScenarioRow, type SessionRow } from "../domain/mappers";
 import {
   briefingSystemPrompt,
@@ -43,16 +43,23 @@ async function requireSession(db: D1Database, id: string): Promise<SessionRow> {
   return session;
 }
 
-/** Site file + rules, and the scenario (with hidden fields) when the session has one. */
+/**
+ * Site file + rules, and the scenario (with hidden fields) when the session has one. With
+ * `withReference` (debriefs) it also loads the scenario's safety protocols and the local code;
+ * chat turns skip them to stay within the free AI budget.
+ */
 async function sessionContext(
   env: Env,
   session: SessionRow,
+  withReference = false,
 ): Promise<{ site: SiteContext; scenario: ScenarioForPrompt | null }> {
   const account = await getAccount(env.DB, session.account_id);
   if (!account) throw notFound("account not found");
   const row = session.scenario_id ? await getScenario(env.DB, session.scenario_id) : null;
   const scenario = row ? { title: row.title, briefing: row.briefing, ...scenarioHidden(row) } : null;
-  return { site: await loadSite(env, account), scenario };
+  const site = await loadSite(env, account);
+  if (!withReference) return { site, scenario };
+  return { site: { ...site, ...(await loadReference(env, account, scenario?.protocolIds ?? [])) }, scenario };
 }
 
 export const sessions = new Hono<AppEnv>()
@@ -133,7 +140,7 @@ export const sessions = new Hono<AppEnv>()
     if (!transcript.some((m) => m.role === "user")) {
       throw badRequest("nothing to grade yet: the electrician has not sent any messages");
     }
-    const { site, scenario } = await sessionContext(c.env, session);
+    const { site, scenario } = await sessionContext(c.env, session, true);
     const debrief: Debrief = await generateJson(c.env, debriefMessages(site, transcript, scenario), DebriefSchema);
     await completeSession(c.env.DB, session.id, JSON.stringify(debrief), now());
     return c.json(debrief);

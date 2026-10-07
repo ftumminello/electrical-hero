@@ -4,7 +4,7 @@ import type { ScenarioPublic } from "@electrical-hero/shared";
 import type { AppEnv } from "../env";
 import { badRequest, notFound, readJson } from "../http";
 import { getAccount, getScenario, insertScenario, now } from "../data/db";
-import { listTemplates, loadSite } from "../data/content";
+import { listTemplates, loadReference, loadSite } from "../data/content";
 import { hiddenJson, parseFeatures, toScenarioPublic, type ScenarioRow } from "../domain/mappers";
 import { scenarioGenerationMessages } from "../domain/prompts";
 import { GeneratedScenarioSchema } from "../domain/schemas";
@@ -33,7 +33,11 @@ export const scenarios = new Hono<AppEnv>()
           : "no scenario templates apply to this account",
       );
     }
-    const site = await loadSite(c.env, account);
+    const [base, reference] = await Promise.all([
+      loadSite(c.env, account),
+      loadReference(c.env, account, template.protocols),
+    ]);
+    const site = { ...base, ...reference };
     const generated = await generateJson(c.env, scenarioGenerationMessages(site, template), GeneratedScenarioSchema);
     const row: ScenarioRow = {
       id: crypto.randomUUID(),
@@ -42,7 +46,7 @@ export const scenarios = new Hono<AppEnv>()
       title: generated.title,
       difficulty: template.difficulty,
       briefing: generated.briefing,
-      hidden_json: hiddenJson(generated),
+      hidden_json: hiddenJson(generated, template.protocols),
       created_at: now(),
     };
     await insertScenario(c.env.DB, row);

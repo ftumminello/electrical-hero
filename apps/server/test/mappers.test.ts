@@ -27,7 +27,7 @@ const generated = {
 
 const scenario: ScenarioRow = {
   id: "scn-1", account_id: "acct-1", template_id: "tmpl-a", title: "Dark suite", difficulty: "intermediate",
-  briefing: "Lights out in 400.", hidden_json: hiddenJson(generated), created_at: "2026-10-07T00:00:00.000Z",
+  briefing: "Lights out in 400.", hidden_json: hiddenJson(generated, []), created_at: "2026-10-07T00:00:00.000Z",
 };
 
 describe("mappers", () => {
@@ -54,8 +54,17 @@ describe("mappers", () => {
   it("scenarioHidden round-trips the generated hidden fields", () => {
     expect(scenarioHidden(scenario)).toEqual({
       hiddenFacts: generated.hiddenFacts, expectedApproach: generated.expectedApproach,
-      rubric: generated.rubric, redFlags: generated.redFlags,
+      rubric: generated.rubric, redFlags: generated.redFlags, protocolIds: [],
     });
+  });
+
+  it("hiddenJson stores the safety protocols the scenario was built on", () => {
+    expect(scenarioHidden({ ...scenario, hidden_json: hiddenJson(generated, ["sp-loto"]) }).protocolIds).toEqual(["sp-loto"]);
+  });
+
+  it("scenarios saved before protocols existed read back with no protocols", () => {
+    const legacy = { ...scenario, hidden_json: JSON.stringify({ hiddenFacts: ["x"], expectedApproach: ["y"], rubric: [{ criterion: "c" }], redFlags: [] }) };
+    expect(scenarioHidden(legacy).protocolIds).toEqual([]);
   });
 
   it("toSessionDetail parses the stored debrief", () => {
