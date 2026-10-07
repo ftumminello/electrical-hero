@@ -87,7 +87,7 @@ export function HomeView() {
           <SectionHeading
             id="history-heading"
             eyebrow="Your track record"
-            title="Problems you've overcome"
+            title="Past Problems"
             action={trainee.history.length > 0 && <TextLink href="/history">See all</TextLink>}
           />
           <TrainingHistoryList records={trainee.history.slice(0, 3)} />

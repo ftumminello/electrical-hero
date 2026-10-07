@@ -96,7 +96,7 @@ export function AccountView() {
       <View className="gap-4">
         <SectionHeading
           eyebrow="Your track record"
-          title="Problems you've overcome"
+          title="Past Problems"
           action={trainee.history.length > 0 && <TextLink href="/history">See all</TextLink>}
         />
         <StatGrid stats={stats} />

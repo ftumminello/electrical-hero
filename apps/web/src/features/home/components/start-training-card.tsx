@@ -31,7 +31,7 @@ export function StartTrainingCard({ account }: { account: AccountDetail }) {
   return (
     <Card as="section" className="gap-4">
       <Text variant="eyebrow" className="text-ink-muted">
-        Next problem
+        Current scenario
       </Text>
       <Text variant="display-l" as="h2">
         {account.name}
@@ -52,23 +52,25 @@ export function StartTrainingCard({ account }: { account: AccountDetail }) {
         won't know the cause until you find it.
       </Text>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-        <Button
-          label="Start next problem"
-          isPending={isStarting && mode === "scenario"}
-          disabled={isStarting}
-          onPress={() => begin("scenario")}
-          className="w-full sm:w-auto"
-        />
-        <Button
-          variant="secondary"
-          label="Ask about this site first"
-          isPending={isStarting && mode === "briefing"}
-          disabled={isStarting}
-          onPress={() => begin("briefing")}
-          className="w-full sm:w-auto"
-        />
-      </div>
+      {!isStarting && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <Button
+            label="Start training"
+            isPending={isStarting && mode === "scenario"}
+            disabled={isStarting}
+            onPress={() => begin("scenario")}
+            className="w-full sm:w-auto"
+          />
+          <Button
+            variant="secondary"
+            label="Ask about this site first"
+            isPending={isStarting && mode === "briefing"}
+            disabled={isStarting}
+            onPress={() => begin("briefing")}
+            className="w-full sm:w-auto"
+          />
+        </div>
+      )}
       <div aria-live="polite">
         {isStarting && <StatusBadge status="pending" label={PHASE_LABEL[phase]} />}
         {error && (

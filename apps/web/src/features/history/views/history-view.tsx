@@ -17,7 +17,7 @@ export function HistoryView() {
         <Text variant="eyebrow" className="text-ink-muted">
           Your track record
         </Text>
-        <Text variant="display-l">Problems you've overcome</Text>
+        <Text variant="display-l">Past Problems</Text>
         <Text className="text-ink-muted">
           Sessions started on this device. Open one to see the transcript and debrief.
         </Text>
