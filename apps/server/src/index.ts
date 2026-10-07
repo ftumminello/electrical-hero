@@ -5,6 +5,8 @@ import type { AppEnv } from "./env";
 import { errorResponse } from "./http";
 import { accounts } from "./routes/accounts";
 import { rules } from "./routes/rules";
+import { scenarios } from "./routes/scenarios";
+import { sessions } from "./routes/sessions";
 import { templates } from "./routes/templates";
 
 const app = new Hono<AppEnv>();
@@ -21,5 +23,7 @@ app.get("/health", (c) => {
 app.route("/accounts", accounts);
 app.route("/rules", rules);
 app.route("/scenario-templates", templates);
+app.route("/scenarios", scenarios);
+app.route("/sessions", sessions);
 
 export default app;
