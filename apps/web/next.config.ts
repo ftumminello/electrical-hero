@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
           has: [{ type: "host", value: ADMIN_HOST }],
           destination: "/admin/safety-protocols",
         },
+        {
+          source: "/electrical-codes",
+          has: [{ type: "host", value: ADMIN_HOST }],
+          destination: "/admin/electrical-codes",
+        },
       ],
       afterFiles: [{ source: "/api/:path*", destination: "http://localhost:3000/:path*" }],
       fallback: [],

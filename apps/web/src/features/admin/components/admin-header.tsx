@@ -4,14 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { APP_NAME } from "@electrical-hero/shared";
 import { cn } from "@electrical-hero/design-system/cn";
-import { ExternalLink, Plug, ShieldCheck } from "@electrical-hero/core/icons";
+import { BookOpen, ExternalLink, Plug, ShieldCheck } from "@electrical-hero/core/icons";
 import { Text } from "@electrical-hero/core/shared/text";
 
 /** The trainee site the admin area links back to (it lives on another host). */
 const TRAINING_URL = process.env.NEXT_PUBLIC_TRAINING_URL ?? "https://electrical-hero.com";
 
 // Links use /admin paths, which work on every host. On admin.electrical-hero.com the browser path can also
-// be "/" or "/safety-protocols" (the host rewrite), so matching accepts both forms.
+// be "/", "/safety-protocols" or "/electrical-codes" (the host rewrite), so matching accepts both forms.
 const NAV = [
   { href: "/admin", label: "Integrations", icon: Plug, matches: (path: string) => path === "/" || path === "/admin" },
   {
@@ -19,6 +19,12 @@ const NAV = [
     label: "Safety protocols",
     icon: ShieldCheck,
     matches: (path: string) => path.endsWith("/safety-protocols"),
+  },
+  {
+    href: "/admin/electrical-codes",
+    label: "Electrical codes",
+    icon: BookOpen,
+    matches: (path: string) => path.endsWith("/electrical-codes"),
   },
 ];
 

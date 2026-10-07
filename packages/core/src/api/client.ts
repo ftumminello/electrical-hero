@@ -2,6 +2,7 @@ import type {
   AccountDetail,
   AccountSummary,
   ApiError,
+  CodeSpec,
   CompanyRules,
   CreateScenarioRequest,
   CreateSessionRequest,
@@ -57,6 +58,8 @@ export function createApiClient(baseUrl: string) {
     listAccounts: () => request<AccountSummary[]>("/accounts"),
     getAccount: (accountId: string) => request<AccountDetail>(`/accounts/${encodeURIComponent(accountId)}`),
     getRules: () => request<CompanyRules>("/rules"),
+    /** 404 (ApiRequestError) when no code spec has been written for that jurisdiction yet. */
+    getCodeSpec: (jurisdictionId: string) => request<CodeSpec>(`/code-specs/${encodeURIComponent(jurisdictionId)}`),
     listSafetyProtocols: () => request<SafetyProtocolSummary[]>("/safety-protocols"),
     getSafetyProtocol: (protocolId: string) =>
       request<SafetyProtocol>(`/safety-protocols/${encodeURIComponent(protocolId)}`),
