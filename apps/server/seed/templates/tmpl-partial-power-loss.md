@@ -5,6 +5,7 @@ difficulty: intermediate
 requires: [tenant-panels]
 skills: [troubleshooting, single-phasing, customer-communication]
 rules: [R-LOTO-01, R-VERIFY-01, R-CUST-01]
+protocols: [sp-loto, sp-energized-diagnostics, sp-arc-flash-ppe]
 ---
 Create a service call where one tenant has lost part of their power: some lights, receptacles or equipment are dead while others still work. Choose a real tenant and tenant panel from the site file, and one root cause that fits that equipment:
 - a tripped pole of a multi-wire branch circuit with a shared neutral;

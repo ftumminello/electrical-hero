@@ -9,7 +9,7 @@ VALUES (
   'Dana Whitfield (Chief Engineer)', '555-0142',
   '480Y/277V 3-phase 4-wire, 4000 A switchboard MSB-1, 750 kW generator GEN-1 with ATS-LS and ATS-OS, fire pump FP-1',
   'MSB-1 is 32 cal/cm2 (category 4) and is never opened energized. LP-14U stays live from UPS-14 when LP-14A is off. Check EC-18 for water before opening panels.',
-  '["three-phase-480","switchboard","tenant-panels","generator","ats","fire-pump"]',
+  '["three-phase-480","switchboard","tenant-panels","generator","ats","fire-pump","ev-chargers","vfd","ups"]',
   'acct-harbor-point-tower.md'
 )
 ON CONFLICT(id) DO UPDATE SET
@@ -26,7 +26,7 @@ VALUES (
   'Marcus Bell (Facilities Manager)', '555-0167',
   '480Y/277V 3-phase 4-wire, 2000 A switchboard MSB-1, 500 kW generator GEN-1, essential electrical system with ATS-LS, ATS-CR and ATS-EQ',
   'Healthcare site: coordinate with facilities and the ASC charge nurse before touching any EES branch. Tenant panel and CR-1W arc-flash labels date from 2021 and count as expired.',
-  '["three-phase-480","switchboard","tenant-panels","generator","ats","essential-electrical-system"]',
+  '["three-phase-480","switchboard","tenant-panels","generator","ats","essential-electrical-system","isolated-power","vfd"]',
   'acct-cedar-ridge-medical.md'
 )
 ON CONFLICT(id) DO UPDATE SET

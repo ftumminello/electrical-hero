@@ -5,6 +5,7 @@ difficulty: advanced
 requires: [switchboard]
 skills: [arc-flash-safety, energized-work-decisions, escalation]
 rules: [R-PPE-01, R-EWP-01, R-ESC-01]
+protocols: [sp-arc-flash-ppe, sp-energized-work-permit]
 ---
 Create a situation where an infrared scan, a burning smell, or visible discoloration points to a hot connection in the site's main switchboard, meter center, or a distribution section named in the site file. Use the real gear IDs, the arc-flash label values and dates, and any related service history (including findings that were deferred).
 

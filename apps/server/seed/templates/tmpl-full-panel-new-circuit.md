@@ -5,6 +5,7 @@ difficulty: intermediate
 requires: [tenant-panels]
 skills: [load-calculation, code-compliance, customer-communication]
 rules: [R-LOAD-01, R-LABEL-01, R-CUST-01]
+protocols: [sp-loto, sp-arc-flash-ppe]
 ---
 Create a request from a tenant or the property manager to add one or two new dedicated circuits (new equipment, an appliance, or an IT rack) to a tenant panel that the site file shows is full or nearly full. Use the real panel, tenant, and any pending requests from the site file.
 

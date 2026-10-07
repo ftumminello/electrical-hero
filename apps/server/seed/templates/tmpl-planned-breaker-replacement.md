@@ -5,6 +5,7 @@ difficulty: beginner
 requires: []
 skills: [shutdown-planning, lockout-tagout, documentation]
 rules: [R-NOTIFY-01, R-LOTO-01, R-VERIFY-01, R-DOC-01, R-LABEL-01]
+protocols: [sp-loto, sp-switching]
 ---
 Create a planned job to replace one branch or feeder breaker in a specific panel named in the site file. The reason is one of: a cracked case, a breaker that failed a trip test, or a wrong-type breaker found during maintenance. The electrician must plan and run the shutdown.
 

@@ -5,6 +5,7 @@ difficulty: advanced
 requires: [generator, ats]
 skills: [emergency-systems, escalation, customer-communication]
 rules: [R-EMERG-01, R-ESC-01, R-NOTIFY-01]
+protocols: [sp-generator-ats, sp-switching]
 ---
 Create a call where the site's monthly generator test did not go to plan. The failure is one of:
 - the generator failed to start;
