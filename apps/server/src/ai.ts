@@ -10,9 +10,12 @@ const JSON_MAX_TOKENS = 4000;
 // The generated binding types are per-model unions; we pick the model from vars at runtime.
 type AiRunner = { run(model: string, inputs: Record<string, unknown>): Promise<unknown> };
 
-async function run(env: Env, inputs: Record<string, unknown>): Promise<unknown> {
+// Chat stays cheap and fast; the once-per-scenario JSON jobs buy more reasoning for accuracy.
+type Effort = "low" | "medium";
+
+async function run(env: Env, effort: Effort, inputs: Record<string, unknown>): Promise<unknown> {
   const model: string = env.AI_MODEL;
-  const tuning = model.startsWith("@cf/openai/gpt-oss") ? { reasoning_effort: "low" } : {};
+  const tuning = model.startsWith("@cf/openai/gpt-oss") ? { reasoning_effort: effort } : {};
   try {
     return await (env.AI as unknown as AiRunner).run(model, { ...tuning, ...inputs });
   } catch (e) {
@@ -21,7 +24,7 @@ async function run(env: Env, inputs: Record<string, unknown>): Promise<unknown> 
 }
 
 export async function streamChat(env: Env, messages: ModelMessage[]): Promise<ReadableStream<Uint8Array>> {
-  return (await run(env, { messages, stream: true, max_tokens: CHAT_MAX_TOKENS })) as ReadableStream<Uint8Array>;
+  return (await run(env, "low", { messages, stream: true, max_tokens: CHAT_MAX_TOKENS })) as ReadableStream<Uint8Array>;
 }
 
 /** Asks for JSON, validates it, and retries once with the validation error before giving up with a 502. */
@@ -29,7 +32,7 @@ export async function generateJson<T>(env: Env, messages: ModelMessage[], schema
   let attempt = messages;
   let lastError = "";
   for (let i = 0; i < 2; i++) {
-    const text = completionText(await run(env, { messages: attempt, max_tokens: JSON_MAX_TOKENS }));
+    const text = completionText(await run(env, "medium", { messages: attempt, max_tokens: JSON_MAX_TOKENS }));
     const parsed = parseModelJson(text, schema);
     if (parsed.ok) return parsed.value;
     lastError = parsed.error;

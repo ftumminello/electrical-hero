@@ -94,27 +94,33 @@ export const sessions = new Hono<AppEnv>()
     const { site, scenario } = await sessionContext(c.env, session);
     const history = await listMessages(c.env.DB, session.id);
     const userMessage = newMessage(session.id, "user", content);
-    await insertMessage(c.env.DB, userMessage);
     const messages: ModelMessage[] = [
       { role: "system", content: scenario ? scenarioSystemPrompt(site, scenario) : briefingSystemPrompt(site) },
       ...[...history, userMessage].map((m) => ({ role: m.role, content: m.content })),
     ];
-    // Called before streaming starts so an AI failure still returns a normal JSON 502.
+    // Called before streaming starts so an AI failure still returns a normal JSON 502,
+    // and before saving the message so a failed turn leaves no orphan in the history.
     const upstream = await streamChat(c.env, messages);
+    await insertMessage(c.env.DB, userMessage);
     return streamSSE(c, async (stream) => {
-      let reply = "";
-      try {
-        for await (const text of textDeltas(upstream)) {
-          reply += text;
-          await stream.writeSSE({ event: "delta", data: JSON.stringify({ text }) });
+      const turn = (async () => {
+        let reply = "";
+        try {
+          for await (const text of textDeltas(upstream)) {
+            reply += text;
+            await stream.writeSSE({ event: "delta", data: JSON.stringify({ text }) });
+          }
+          if (!reply.trim()) throw new Error("AI returned an empty reply");
+          const saved = newMessage(session.id, "assistant", reply);
+          await insertMessage(c.env.DB, saved);
+          await stream.writeSSE({ event: "done", data: JSON.stringify({ messageId: saved.id }) });
+        } catch (e) {
+          await stream.writeSSE({ event: "error", data: JSON.stringify({ error: (e as Error).message }) });
         }
-        if (!reply.trim()) throw new Error("AI returned an empty reply");
-        const saved = newMessage(session.id, "assistant", reply);
-        await insertMessage(c.env.DB, saved);
-        await stream.writeSSE({ event: "done", data: JSON.stringify({ messageId: saved.id }) });
-      } catch (e) {
-        await stream.writeSSE({ event: "error", data: JSON.stringify({ error: (e as Error).message }) });
-      }
+      })();
+      // Keep the invocation alive so the reply is still saved if the client disconnects mid-stream.
+      c.executionCtx.waitUntil(turn);
+      await turn;
     });
   })
   .post("/:id/debrief", async (c) => {
