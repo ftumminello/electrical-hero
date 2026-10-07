@@ -18,6 +18,13 @@ echo "== accounts";          json "$BASE/accounts" | field '.map(a => a.id).join
 echo "== account detail";    json "$BASE/accounts/$ACCT" | field '.configMarkdown.slice(0, 120)'
 echo "== rules";             json "$BASE/rules" | field '.markdown.slice(0, 80)'
 echo "== templates for $ACCT"; json "$BASE/scenario-templates?accountId=$ACCT" | field '.map(t => t.id).join(", ")'
+echo "== safety protocols";  json "$BASE/safety-protocols" | field '.map(p => p.id).join(", ")'
+echo "== protocols at $ACCT"; json "$BASE/accounts/$ACCT/safety-protocols" | field '.map(p => p.id).join(", ")'
+echo "== one protocol";      json "$BASE/safety-protocols/sp-loto" | field '.markdown.slice(0, 80)'
+echo "== unknown protocol -> 404"; expect_status 404 "$BASE/safety-protocols/sp-nope"
+echo "== code spec at $ACCT"; json "$BASE/accounts/$ACCT/code-specs" | field '.necEdition'
+echo "== OSHA 1910.333 (live eCFR)"; json "$BASE/regulations/cfr/29/1910.333" | field '.heading'
+echo "== bad section -> 400"; expect_status 400 "$BASE/regulations/cfr/29/1910.147a"
 echo "== template that does not apply -> 400"
 expect_status 400 -X POST "$BASE/scenarios" -d '{"accountId":"acct-maple-commons","templateId":"tmpl-generator-failed-test"}'
 

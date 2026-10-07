@@ -92,8 +92,8 @@ Show the electrician's message immediately (optimistic UI), then grow the assist
 
 ## Behaviour worth handling in the UI
 
-- **AI latency:** scenario generation and debriefs take tens of seconds. Show a spinner, and disable the button to avoid double submits, because each call spends free AI quota.
-- **502:** the AI failed or is out of the daily free allowance. It's usually safe to retry later. Show the `error` text.
+- **AI latency:** scenario generation and debriefs take tens of seconds. Show a spinner, and disable the button to avoid double submits, because each call is billed AI time.
+- **502:** the AI failed (a model error, invalid output twice, or a rate limit). It's usually safe to retry. Show the `error` text.
 - **Completed sessions:** after a debrief, `POST …/messages` returns 400 with `"session is completed; start a new session to keep training"`. Start a new session.
 - **Debrief before chatting:** returns 400 with `"nothing to grade yet: the electrician has not sent any messages"`.
 - **Hidden answers:** scenarios never expose the cause or rubric. Only `title`, `difficulty` and `briefing` are public. The rubric appears in the debrief.

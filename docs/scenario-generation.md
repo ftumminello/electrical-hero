@@ -148,18 +148,18 @@ The model writes the words; code holds the facts and the gates. Each risk below 
 
 ## Cost, latency and limits
 
-On Cloudflare's free tier, the binding limit is the daily Workers AI allowance: 10,000 neurons, about $0.11 of model time. Once it's spent, AI calls return 502 until it resets.
+The account is on **Workers Paid** (since 2026-10-07). The first 10,000 neurons a day (about $0.11 of model time) are included; after that, Workers AI bills pay-as-you-go at $0.011 per 1,000 neurons, with no daily hard stop. `gpt-oss-120b` is rate-limited to 300 requests per minute.
 
-| AI job | Typical input | Typical output | Approx. cost | Approx. per free day | Wait |
+| AI job | Typical input | Typical output | Approx. cost | Approx. per $1 | Wait |
 | --- | --- | --- | --- | --- | --- |
-| Generate a scenario | ~10k tokens (site file, rules, template) | ~3k tokens incl. reasoning | ~$0.006 | ~18 | 10–40 s |
-| One chat turn | ~10k tokens (site file, rules, scenario, history) | ~1k tokens | ~$0.004 | ~25 | first words in a few seconds |
-| Debrief | ~10k tokens plus the transcript | ~2k tokens | ~$0.005 | ~20 | 10–30 s |
+| Generate a scenario | ~15k tokens (site file, rules, protocols, local code, template) | ~3k tokens incl. reasoning | ~$0.008 | ~130 | 10–40 s |
+| One chat turn | ~11k tokens (site file, rules, scenario, history) | ~1k tokens | ~$0.0045 | ~220 | first words in a few seconds |
+| Debrief | ~15k tokens plus the transcript | ~2k tokens | ~$0.007 | ~140 | 10–30 s |
 
-Costs are estimates from the model's list price ($0.35 per million input tokens, $0.75 per million output) and the size of the new site files. The allowance is shared across all three jobs.
+Costs are estimates from the model's list price ($0.35 per million input tokens, $0.75 per million output) and the size of the current site files.
 
-- **Model:** `@cf/openai/gpt-oss-120b`, open weights under Apache-2.0, not restricted to the paid plan. It's one setting (`AI_MODEL`) in `wrangler.jsonc`; `@cf/zai-org/glm-4.7-flash` costs roughly a fifth as much per turn.
-- **Before a demo:** generate 2–3 scenarios per site, read each against its site file, and keep the IDs of the good ones. `GET /accounts/{id}/scenarios` lists every scenario generated for a site, so the app can offer them without spending more of the allowance.
+- **Model:** `@cf/openai/gpt-oss-120b`, open weights under Apache-2.0. It's one setting (`AI_MODEL`) in `wrangler.jsonc`. The paid plan also unlocks larger open-weights models (GLM-5.3, GLM-5.3-flash, Kimi K2.6, DeepSeek V4), limited to 20 requests per minute.
+- **Before a demo:** generate 2–3 scenarios per site, read each against its site file, and keep the IDs of the good ones. `GET /accounts/{id}/scenarios` lists every scenario generated for a site, so the app can offer them without generating new ones live.
 
 ## Extending it, and known limits
 
