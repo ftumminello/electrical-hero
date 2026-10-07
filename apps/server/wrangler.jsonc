@@ -15,7 +15,7 @@
     {
       "binding": "DB",
       "database_name": "electrical-hero",
-      "database_id": "",
+      "database_id": "7a299c59-4e8c-4e29-8c0a-98e32c09a532",
       "migrations_dir": "migrations"
     }
   ],

@@ -23,3 +23,9 @@ The human directed. Claude asked questions, researched and wrote. Key prompts, p
 9. "Since the frontend isn't built yet, we will test the backend via this chat." "Use the best open source 'free' AI model."
 
 Output: `docs/superpowers/specs/2026-10-07-backend-foundation-design.md`.
+
+## Session 1 — 2026-10-07 — backend build
+
+10. "Approved, go ahead and build it." Claude wrote the implementation plan (`docs/superpowers/plans/2026-10-07-backend-foundation.md`), then implemented it test-first in 10 tasks: shared contract types → Hono Worker scaffold → template/rules parsing → AI stream + JSON handling → prompts and mappers → D1/R2/AI data layer → read routes → scenario/session/debrief routes → seed content (rulebook, 3 client sites, 5 scenario templates, all fictional and AI-written) → provision + deploy + smoke test.
+11. "I have used another session to set up cf token". Wrangler auth is the account-scoped token in `apps/server/.env`, so the global login is untouched.
+12. Deployed to `https://electrical-hero-api.electrical-hero.workers.dev`. `apps/server/scripts/smoke.sh` passes end to end (scenario generation, streamed chat and debrief on `@cf/openai/gpt-oss-120b`).
