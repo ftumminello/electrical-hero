@@ -8,6 +8,7 @@ difficulty: advanced
 requires: [generator]
 skills: [troubleshooting]
 rules: [R-LOTO-01]
+protocols: [sp-loto]
 ---
 Do the thing.
 `;
@@ -21,6 +22,7 @@ describe("templates", () => {
       requires: ["generator"],
       skills: ["troubleshooting"],
       rules: ["R-LOTO-01"],
+      protocols: ["sp-loto"],
       instructions: "Do the thing.",
     });
   });

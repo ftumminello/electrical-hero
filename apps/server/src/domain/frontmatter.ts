@@ -19,3 +19,6 @@ export function parseFrontmatter(markdown: string): Frontmatter {
   }
   return { data, body: match[2] };
 }
+
+/** A front-matter value as a list: lists stay lists, a scalar becomes a one-item list, absent becomes []. */
+export const asList = (v: string | string[] | undefined): string[] => (Array.isArray(v) ? v : v ? [v] : []);
