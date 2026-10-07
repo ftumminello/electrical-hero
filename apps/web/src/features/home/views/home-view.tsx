@@ -35,7 +35,7 @@ export function HomeView() {
     <>
       <section className="relative bg-surface-inverse">
         <DemoQrCode />
-        <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-12 md:px-6">
+        <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-12 md:px-6 lg:pr-52 2xl:pr-6">
           <Text variant="eyebrow" className="text-voltage">
             {companyName ?? "Field training"}
           </Text>
