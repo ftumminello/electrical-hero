@@ -4,6 +4,9 @@ import { APP_NAME, type HealthResponse } from "@electrical-hero/shared";
 import type { AppEnv } from "./env";
 import { errorResponse } from "./http";
 import { accounts } from "./routes/accounts";
+import { codeSpecs } from "./routes/codeSpecs";
+import { protocols } from "./routes/protocols";
+import { regulations } from "./routes/regulations";
 import { rules } from "./routes/rules";
 import { scenarios } from "./routes/scenarios";
 import { sessions } from "./routes/sessions";
@@ -25,5 +28,8 @@ app.route("/rules", rules);
 app.route("/scenario-templates", templates);
 app.route("/scenarios", scenarios);
 app.route("/sessions", sessions);
+app.route("/safety-protocols", protocols);
+app.route("/code-specs", codeSpecs);
+app.route("/regulations", regulations);
 
 export default app;

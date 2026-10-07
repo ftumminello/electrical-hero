@@ -22,6 +22,8 @@
   "r2_buckets": [
     { "binding": "CLIENT_CONFIGS", "bucket_name": "eh-client-configs" },
     { "binding": "COMPANY_RULES", "bucket_name": "eh-company-rules" },
-    { "binding": "SCENARIO_TEMPLATES", "bucket_name": "eh-scenario-templates" }
+    { "binding": "SCENARIO_TEMPLATES", "bucket_name": "eh-scenario-templates" },
+    { "binding": "SAFETY_PROTOCOLS", "bucket_name": "eh-safety-protocols" },
+    { "binding": "CODE_SPECS", "bucket_name": "eh-code-specs" }
   ]
 }
