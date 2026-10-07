@@ -4,6 +4,26 @@ The web app lives in `apps/web` (Next.js, App Router, `src/app`). Shared types g
 
 All screens follow the Volt Academy design system in `.claude/design-system/` (`README.md` for brand rules, `tokens.json` for colors, type, spacing, radii and shadows).
 
+## How the screens map to the API
+
+Both apps (web `apps/web`, native `apps/native`) share their data logic through `packages/core`: the API client (`api/`), `ApiProvider` and `TraineeProvider`, and the hooks `use-start-training` and `use-training-session`. See `docs/api/README.md` for the endpoints.
+
+| Plan | Route (web / native) | API |
+| --- | --- | --- |
+| Home / Problem Selection | `/` · `(tabs)/index` | `GET /accounts` (job sites), `GET /accounts/:id` (critical info), `POST /scenarios` (random problem), `POST /sessions` |
+| Problem Screen | `/session/[id]` · `session/[id]` | `GET /sessions/:id`, `GET /scenarios/:id`, `GET /scenario-templates` (rules and skills), streamed `POST /sessions/:id/messages`, `POST /sessions/:id/debrief` |
+| Account / Profile | `/account` · `(tabs)/account` | `GET /rules` (company name); name, history and badges are stored on the device |
+| History | `/history` · `history` | Stored on the device; each entry opens its session |
+| Company Leaderboard | `/leaderboard` · `(tabs)/leaderboard` | No endpoint yet; shows only the current trainee |
+
+### Not supported by the server yet
+
+- **Leaderboard, user score and badges across devices:** there are no users or a list of sessions, so scores and badges come from this device's history only.
+- **Profile picture and company logo:** initials and an icon stand in.
+- **PPE / tools list:** scenarios don't return one; the screen shows the site's critical info, the template's company rules (e.g. `R-PPE-01`) and the site file.
+- **"Pass this question":** there's no pass endpoint, so it sends a "give me a hint" message; the AI stays in character as dispatch.
+- **Voice on native:** web uses the browser's speech recognition. Native would need `expo-speech-recognition`, which doesn't run in Expo Go, so it relies on the keyboard's dictation for now.
+
 ## Screens
 
 ### 1. Account / Profile Screen

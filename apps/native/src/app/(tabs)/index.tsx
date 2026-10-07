@@ -1,5 +1,5 @@
 import { HomeView } from "@features/home/views/home-view";
 
-export default function Index() {
+export default function HomeScreen() {
   return <HomeView />;
 }
