@@ -36,7 +36,7 @@ On a physical device, point the native app at your machine:
 
 ## Backend (Cloudflare)
 
-Deployed API: https://electrical-hero-api.electrical-hero.workers.dev (no auth; hackathon demo). Contract types live in `packages/shared`.
+Deployed API: https://electrical-hero-api.electrical-hero.workers.dev (no auth; hackathon demo). Frontend guide: [`docs/api/README.md`](docs/api/README.md); OpenAPI spec: [`docs/api/openapi.yaml`](docs/api/openapi.yaml); TypeScript types: `packages/shared`.
 
 Wrangler authenticates with the account-scoped token in `apps/server/.env` (gitignored), so run these from the repo root via pnpm:
 

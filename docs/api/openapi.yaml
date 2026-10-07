@@ -1,0 +1,666 @@
+openapi: 3.1.0
+info:
+  title: Electrical Hero API
+  version: 0.1.0
+  summary: Backend for training electricians on real customer sites.
+  description: |
+    Electrical contractors use Electrical Hero to train their electricians on the contractor's real
+    customer sites ("accounts"). The API serves each site's electrical configuration and the
+    contractor's work rules, generates AI training scenarios for a site, runs streamed AI
+    training chats, and grades them with an AI debrief.
+
+    **Conventions**
+    - No authentication (hackathon demo). CORS is open (`*`).
+    - All request and response bodies are JSON, except `POST /sessions/{sessionId}/messages`,
+      which responds with a Server-Sent Events stream (see that operation).
+    - Every error is `{"error": string}` (`ApiError`) with status 400 (bad input or a disallowed
+      action), 404 (unknown id), 500 (server or seed-content problem), or 502 (the AI failed).
+      Validation messages name the offending field, e.g. `"✖ Too small: expected string to have >=1 characters\n  → at traineeName"`.
+    - Timestamps are ISO-8601 UTC strings. Generated ids are UUIDs; seeded ids are readable slugs
+      (e.g. `acct-harbor-point-tower`, `tmpl-partial-power-loss`).
+    - AI-backed operations (`POST /scenarios`, `POST /sessions/{id}/messages`,
+      `POST /sessions/{id}/debrief`) take seconds, not milliseconds. Show progress in the UI.
+
+    **Typical flow**
+    1. `GET /accounts` → pick a site → `GET /accounts/{accountId}` for its details.
+    2. Either start a **briefing** chat (`POST /sessions` without `scenarioId`), or
+       `POST /scenarios` to generate a scenario and then `POST /sessions` with its `scenarioId`.
+    3. Send each electrician message with `POST /sessions/{sessionId}/messages` and render the stream.
+    4. `POST /sessions/{sessionId}/debrief` to grade the session. This also closes it.
+
+    TypeScript types for every schema here are exported from `@electrical-hero/shared`.
+servers:
+  - url: https://electrical-hero-api.electrical-hero.workers.dev
+    description: Deployed Cloudflare Worker (seeded data)
+  - url: http://localhost:3000
+    description: Local `wrangler dev` (local D1/R2 start empty)
+security: []  # No authentication (hackathon demo).
+tags:
+  - name: Health
+    description: Liveness.
+  - name: Accounts
+    description: The contractor's customer sites.
+  - name: Rules
+    description: The contractor's own work standards.
+  - name: Scenario templates
+    description: Preset scenario types the generator can apply to a site.
+  - name: Scenarios
+    description: AI-generated training scenarios for a specific site.
+  - name: Sessions
+    description: Training conversations (briefing or scenario), streamed replies and debriefs.
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      operationId: getHealth
+      summary: Liveness check
+      responses:
+        "200":
+          description: Service is up.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HealthResponse" }
+              example: { status: ok, app: Electrical Hero }
+
+  /accounts:
+    get:
+      tags: [Accounts]
+      operationId: listAccounts
+      summary: List the contractor's customer sites
+      description: Sorted by name.
+      responses:
+        "200":
+          description: All accounts for the configured contractor.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AccountSummary" }
+              example:
+                - id: acct-maple-commons
+                  name: Maple Commons Plaza
+                  buildingType: Single-storey retail strip center with restaurant (6 suites)
+                  address: { line1: 3180 Maple Commons Road, city: Lindale Heights, state: WA, postalCode: "98204" }
+                  serviceSummary: 208Y/120V 3-phase 4-wire, 1200 A switchboard MDP-1 with 7-position meter center MS-1, no generator
+                  features: [three-phase-208, switchboard, tenant-panels, multi-meter, commercial-kitchen]
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /accounts/{accountId}:
+    get:
+      tags: [Accounts]
+      operationId: getAccount
+      summary: Get one site, including its full electrical configuration
+      parameters:
+        - $ref: "#/components/parameters/accountId"
+      responses:
+        "200":
+          description: The account with its site file (Markdown).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccountDetail" }
+              example:
+                id: acct-maple-commons
+                name: Maple Commons Plaza
+                buildingType: Single-storey retail strip center with restaurant (6 suites)
+                address: { line1: 3180 Maple Commons Road, city: Lindale Heights, state: WA, postalCode: "98204" }
+                serviceSummary: 208Y/120V 3-phase 4-wire, 1200 A switchboard MDP-1 with 7-position meter center MS-1, no generator
+                features: [three-phase-208, switchboard, tenant-panels, multi-meter, commercial-kitchen]
+                companyId: co-kestrel
+                siteContact: { name: Priya Nandakumar (Property Manager), phone: 555-0189 }
+                criticalInfo: "Unresolved hot lug on MS-1 position M-A (Suite A tenant breaker). HP-1 arc-flash label missing. Keep restaurant walk-ins powered: no outage longer than 2 hours."
+                configMarkdown: "# Maple Commons Plaza — Site File\n\nAccount `acct-maple-commons` · …"
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /accounts/{accountId}/scenarios:
+    get:
+      tags: [Accounts, Scenarios]
+      operationId: listAccountScenarios
+      summary: List scenarios previously generated for a site
+      description: Newest first.
+      parameters:
+        - $ref: "#/components/parameters/accountId"
+      responses:
+        "200":
+          description: Scenarios for this account (public fields only).
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ScenarioPublic" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /rules:
+    get:
+      tags: [Rules]
+      operationId: getCompanyRules
+      summary: Get the contractor's work rules
+      description: |
+        One Markdown document. Each rule is a `##` heading that starts with a stable rule id
+        (e.g. `R-LOTO-01`), which scenarios and debriefs cite.
+      responses:
+        "200":
+          description: The rulebook.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CompanyRules" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /scenario-templates:
+    get:
+      tags: [Scenario templates]
+      operationId: listScenarioTemplates
+      summary: List scenario templates, optionally only those a site qualifies for
+      parameters:
+        - name: accountId
+          in: query
+          required: false
+          description: When given, only templates whose `requires` are all in that account's `features`.
+          schema: { type: string }
+          example: acct-maple-commons
+      responses:
+        "200":
+          description: Templates, sorted by id.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ScenarioTemplateSummary" }
+              example:
+                - id: tmpl-full-panel-new-circuit
+                  title: Customer wants new circuits in a full panel
+                  difficulty: intermediate
+                  requires: [tenant-panels]
+                  skills: [load-calculation, code-compliance, customer-communication]
+                  rules: [R-LOAD-01, R-LABEL-01, R-CUST-01]
+        "404":
+          description: "`accountId` was given but no such account exists."
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /scenarios:
+    post:
+      tags: [Scenarios]
+      operationId: createScenario
+      summary: Generate a new AI training scenario for a site
+      description: |
+        Applies a scenario template to the site's configuration and the company rules. Omit
+        `templateId` to pick a random template the site qualifies for. The answer (hidden facts,
+        expected approach, rubric, red flags) is stored server-side and never returned.
+        Takes roughly 10–40 s.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateScenarioRequest" }
+            example: { accountId: acct-harbor-point-tower, templateId: tmpl-partial-power-loss }
+      responses:
+        "201":
+          description: The generated scenario (public fields only).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScenarioPublic" }
+              example:
+                id: 7dcc121c-d4b3-44a9-a796-73b25cafdf9f
+                accountId: acct-harbor-point-tower
+                templateId: tmpl-partial-power-loss
+                title: Partial Power Loss in Suite 400 – Lost Phase on Bus Plug BP-4
+                difficulty: intermediate
+                briefing: Tenant reports that at 10:30 AM several ceiling lights and wall receptacles on the north side of Suite 400 are dead, while the south side fixtures and equipment remain powered. They attempted to reset the LP‑4A main breaker, but it trips immediately.
+                createdAt: "2026-10-07T21:38:15.950Z"
+        "400":
+          description: |
+            Invalid body; or `templateId` does not exist or does not apply to this account
+            (e.g. a generator template on a site without a generator); or no template applies.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+              example: { error: template tmpl-generator-failed-test does not exist or does not apply to this account }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+        "502": { $ref: "#/components/responses/AiFailure" }
+
+  /scenarios/{scenarioId}:
+    get:
+      tags: [Scenarios]
+      operationId: getScenario
+      summary: Get one scenario (public fields only)
+      parameters:
+        - $ref: "#/components/parameters/scenarioId"
+      responses:
+        "200":
+          description: The scenario.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScenarioPublic" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /sessions:
+    post:
+      tags: [Sessions]
+      operationId: createSession
+      summary: Start a training session
+      description: |
+        - Without `scenarioId`: a **briefing** session. The AI acts as the account lead and answers
+          the electrician's questions about the site. `messages` starts empty.
+        - With `scenarioId`: a **scenario** session. The AI plays dispatch and the site contact.
+          `messages` starts with one assistant message, the dispatch briefing (`"Dispatch: …"`).
+          The scenario must belong to `accountId`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateSessionRequest" }
+            example: { accountId: acct-harbor-point-tower, scenarioId: 7dcc121c-d4b3-44a9-a796-73b25cafdf9f, traineeName: Sam Rivera }
+      responses:
+        "201":
+          description: The new session.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SessionDetail" }
+              example:
+                id: 5b0f3a8e-2c1d-4e6f-9a7b-0c1d2e3f4a5b
+                accountId: acct-harbor-point-tower
+                scenarioId: 7dcc121c-d4b3-44a9-a796-73b25cafdf9f
+                mode: scenario
+                traineeName: Sam Rivera
+                status: active
+                createdAt: "2026-10-07T21:40:02.118Z"
+                endedAt: null
+                messages:
+                  - id: 0e9d8c7b-6a5f-4e3d-2c1b-0a9f8e7d6c5b
+                    role: assistant
+                    content: "Dispatch: Tenant reports that at 10:30 AM several ceiling lights and wall receptacles on the north side of Suite 400 are dead…"
+                    createdAt: "2026-10-07T21:40:02.118Z"
+                debrief: null
+        "400":
+          description: Invalid body, or the scenario belongs to a different account.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+              example: { error: scenario belongs to a different account }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /sessions/{sessionId}:
+    get:
+      tags: [Sessions]
+      operationId: getSession
+      summary: Get a session with its full transcript (and debrief, once graded)
+      parameters:
+        - $ref: "#/components/parameters/sessionId"
+      responses:
+        "200":
+          description: The session. Messages are in chronological order.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SessionDetail" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /sessions/{sessionId}/messages:
+    post:
+      tags: [Sessions]
+      operationId: sendMessage
+      summary: Send the electrician's message and stream the AI reply (SSE)
+      description: |
+        Stores the electrician's message, then streams the AI reply as Server-Sent Events.
+        `EventSource` cannot send a POST body, so read the response body as a stream
+        (`fetch` on web; `fetch` from `expo/fetch` on native). See `docs/api/README.md`.
+
+        Event types, each with a JSON `data` payload:
+
+        | event   | data                    | meaning |
+        |---------|-------------------------|---------|
+        | `delta` | `StreamDelta` `{text}`  | Next piece of the reply. Append it. |
+        | `done`  | `StreamDone` `{messageId}` | Reply complete and saved. The stream then ends. |
+        | `error` | `StreamError` `{error}` | The reply failed partway through. Nothing is saved for it, so show the error. The stream then ends. |
+
+        Errors detected *before* streaming starts (bad body, unknown or completed session, AI
+        unavailable) come back as normal JSON responses with the status codes below, not as
+        SSE. Check `response.ok` before reading the stream.
+      parameters:
+        - $ref: "#/components/parameters/sessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SendMessageRequest" }
+            example: { content: "I check in with the site contact, then go to EC-04. Before opening LP-4A I put on PPE per the label and verify my meter on a known live source." }
+      responses:
+        "200":
+          description: SSE stream of `delta` events followed by exactly one `done` or `error` event.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: SSE frames (`event:` and `data:` lines separated by a blank line).
+              x-sse-events:
+                delta: { $ref: "#/components/schemas/StreamDelta" }
+                done: { $ref: "#/components/schemas/StreamDone" }
+                error: { $ref: "#/components/schemas/StreamError" }
+              example: |
+                event: delta
+                data: {"text":"Site contact: "}
+
+                event: delta
+                data: {"text":"Dana meets you at EC-04 and opens the closet."}
+
+                event: done
+                data: {"messageId":"3f2a1b0c-9d8e-4f7a-8b6c-5d4e3f2a1b0c"}
+        "400":
+          description: Invalid body, or the session is completed (debriefed).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+              example: { error: "session is completed; start a new session to keep training" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+        "502": { $ref: "#/components/responses/AiFailure" }
+
+  /sessions/{sessionId}/debrief:
+    post:
+      tags: [Sessions]
+      operationId: debriefSession
+      summary: Grade the session and close it
+      description: |
+        AI grading against the scenario rubric and the company rules. For briefing sessions it rates
+        how well the electrician prepared, and `rubric` is empty. The first call stores the debrief
+        and marks the session `completed`, after which it accepts no more messages. Later calls
+        return the stored debrief without calling the AI again. Takes roughly 10–30 s.
+      parameters:
+        - $ref: "#/components/parameters/sessionId"
+      responses:
+        "200":
+          description: The debrief.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Debrief" }
+              example:
+                score: 20
+                verdict: The electrician began correctly with PPE and meter verification but did not complete voltage testing, lockout/tagout, fault correction or documentation.
+                strengths: [Checked in with the site contact first, Selected PPE from the LP-4A label]
+                gaps: [Never applied a personal lock to the bus plug BP-4 (R-LOTO-01)]
+                ruleViolations: []
+                rubric:
+                  - { criterion: Verifies absence of voltage live-dead-live, met: false, evidence: No test on the de-energized circuit was described. }
+        "400":
+          description: The electrician has not sent any messages yet.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+              example: { error: "nothing to grade yet: the electrician has not sent any messages" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+        "502": { $ref: "#/components/responses/AiFailure" }
+
+components:
+  parameters:
+    accountId:
+      name: accountId
+      in: path
+      required: true
+      schema: { type: string }
+      example: acct-harbor-point-tower
+    scenarioId:
+      name: scenarioId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    sessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+
+  responses:
+    NotFound:
+      description: Unknown id (account, scenario or session).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiError" }
+          example: { error: session not found }
+    ServerError:
+      description: Server error, including missing seed content in storage.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiError" }
+          example: { error: "site file acct-maple-commons.md is missing; run the seed upload" }
+    AiFailure:
+      description: Workers AI failed, or returned invalid output twice. Usually safe to retry.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiError" }
+          example: { error: "AI returned invalid JSON twice: ✖ Invalid input: expected array, received undefined\n  → at rubric" }
+
+  schemas:
+    ApiError:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string, description: "Human-readable reason. Safe to show to users." }
+
+    HealthResponse:
+      type: object
+      required: [status, app]
+      properties:
+        status: { type: string, const: ok }
+        app: { type: string, example: Electrical Hero }
+
+    Address:
+      type: object
+      required: [line1, city, state, postalCode]
+      properties:
+        line1: { type: string }
+        city: { type: string }
+        state: { type: string }
+        postalCode: { type: string }
+
+    AccountSummary:
+      type: object
+      required: [id, name, buildingType, address, serviceSummary, features]
+      properties:
+        id: { type: string, example: acct-harbor-point-tower }
+        name: { type: string }
+        buildingType: { type: string }
+        address: { $ref: "#/components/schemas/Address" }
+        serviceSummary: { type: string, description: "One-line description of the electrical service." }
+        features:
+          type: array
+          items: { type: string }
+          description: Site capability tags used to match scenario templates (e.g. `generator`, `ats`, `tenant-panels`, `switchboard`).
+
+    AccountDetail:
+      allOf:
+        - $ref: "#/components/schemas/AccountSummary"
+        - type: object
+          required: [companyId, siteContact, criticalInfo, configMarkdown]
+          properties:
+            companyId: { type: string, example: co-kestrel }
+            siteContact:
+              type: object
+              required: [name, phone]
+              properties:
+                name: { type: [string, "null"] }
+                phone: { type: [string, "null"] }
+            criticalInfo: { type: string, description: "The must-know hazards and access notes. Show these prominently." }
+            configMarkdown: { type: string, description: "The full site file (Markdown) with equipment IDs, panel schedules, history and safety notes." }
+
+    CompanyRules:
+      type: object
+      required: [companyId, markdown]
+      properties:
+        companyId: { type: string, example: co-kestrel }
+        markdown: { type: string, description: "The rulebook (Markdown). Rule ids look like `R-LOTO-01`." }
+
+    Difficulty:
+      type: string
+      enum: [beginner, intermediate, advanced]
+
+    ScenarioTemplateSummary:
+      type: object
+      required: [id, title, difficulty, requires, skills, rules]
+      properties:
+        id: { type: string, example: tmpl-partial-power-loss }
+        title: { type: string }
+        difficulty: { $ref: "#/components/schemas/Difficulty" }
+        requires:
+          type: array
+          items: { type: string }
+          description: Account `features` the site must have.
+        skills: { type: array, items: { type: string } }
+        rules:
+          type: array
+          items: { type: string }
+          description: Company rule ids this template stresses.
+
+    CreateScenarioRequest:
+      type: object
+      required: [accountId]
+      additionalProperties: false
+      properties:
+        accountId: { type: string, minLength: 1 }
+        templateId:
+          type: string
+          minLength: 1
+          description: Omit to pick a random template the account qualifies for.
+
+    ScenarioPublic:
+      type: object
+      required: [id, accountId, templateId, title, difficulty, briefing, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        accountId: { type: string }
+        templateId: { type: string }
+        title: { type: string }
+        difficulty: { $ref: "#/components/schemas/Difficulty" }
+        briefing: { type: string, description: "What dispatch tells the electrician (symptoms only, never the cause)." }
+        createdAt: { type: string, format: date-time }
+
+    SessionMode:
+      type: string
+      enum: [briefing, scenario]
+
+    SessionStatus:
+      type: string
+      enum: [active, completed]
+      description: "`completed` once debriefed; completed sessions reject new messages."
+
+    CreateSessionRequest:
+      type: object
+      required: [accountId, traineeName]
+      additionalProperties: false
+      properties:
+        accountId: { type: string, minLength: 1 }
+        scenarioId:
+          type: string
+          minLength: 1
+          description: Omit for a briefing session. Must belong to `accountId`.
+        traineeName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Free text (no accounts). Leading and trailing whitespace is trimmed, and must not be blank.
+
+    ChatMessage:
+      type: object
+      required: [id, role, content, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        role:
+          type: string
+          enum: [user, assistant]
+          description: "`user` is the electrician; `assistant` is the AI (account lead, or dispatch and site contact)."
+        content: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    Session:
+      type: object
+      required: [id, accountId, scenarioId, mode, traineeName, status, createdAt, endedAt]
+      properties:
+        id: { type: string, format: uuid }
+        accountId: { type: string }
+        scenarioId: { type: [string, "null"] }
+        mode: { $ref: "#/components/schemas/SessionMode" }
+        traineeName: { type: string }
+        status: { $ref: "#/components/schemas/SessionStatus" }
+        createdAt: { type: string, format: date-time }
+        endedAt: { type: [string, "null"], format: date-time }
+
+    SessionDetail:
+      allOf:
+        - $ref: "#/components/schemas/Session"
+        - type: object
+          required: [messages, debrief]
+          properties:
+            messages:
+              type: array
+              items: { $ref: "#/components/schemas/ChatMessage" }
+            debrief:
+              oneOf:
+                - $ref: "#/components/schemas/Debrief"
+                - type: "null"
+
+    SendMessageRequest:
+      type: object
+      required: [content]
+      additionalProperties: false
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          description: What the electrician says or does. Leading and trailing whitespace is trimmed, and must not be blank.
+
+    Debrief:
+      type: object
+      required: [score, verdict, strengths, gaps, ruleViolations, rubric]
+      properties:
+        score: { type: number, minimum: 0, maximum: 100 }
+        verdict: { type: string, description: "One-sentence overall judgement." }
+        strengths: { type: array, items: { type: string } }
+        gaps: { type: array, items: { type: string } }
+        ruleViolations:
+          type: array
+          items:
+            type: object
+            required: [ruleId, evidence]
+            properties:
+              ruleId: { type: string, example: R-LOTO-01 }
+              evidence: { type: string, description: "The electrician's own words." }
+        rubric:
+          type: array
+          description: Empty for briefing sessions.
+          items:
+            type: object
+            required: [criterion, met, evidence]
+            properties:
+              criterion: { type: string }
+              met: { type: boolean }
+              evidence: { type: string }
+
+    StreamDelta:
+      type: object
+      description: "`data` of an SSE `delta` event."
+      required: [text]
+      properties:
+        text: { type: string }
+
+    StreamDone:
+      type: object
+      description: "`data` of an SSE `done` event."
+      required: [messageId]
+      properties:
+        messageId: { type: string, format: uuid, description: "Id of the saved assistant message." }
+
+    StreamError:
+      type: object
+      description: "`data` of an SSE `error` event."
+      required: [error]
+      properties:
+        error: { type: string }
