@@ -1,0 +1,18 @@
+{
+  "name": "electrical-hero",
+  "private": true,
+  "packageManager": "pnpm@11.10.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "dev:web": "pnpm --filter @electrical-hero/web dev",
+    "dev:server": "pnpm --filter @electrical-hero/server dev",
+    "dev:native": "pnpm --filter @electrical-hero/native start"
+  },
+  "devDependencies": {
+    "turbo": "^2.11.7",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "Electrical Hero",
+    "slug": "electrical-hero",
+    "version": "0.0.0",
+    "orientation": "portrait",
+    "ios": {
+      "bundleIdentifier": "com.electricalhero.app"
+    },
+    "android": {
+      "package": "com.electricalhero.app"
+    },
+    "plugins": [
+      "expo-status-bar"
+    ]
+  }
+}
