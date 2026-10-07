@@ -1,5 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "outDir": "dist", "rootDir": "src", "module": "NodeNext", "moduleResolution": "NodeNext" },
-  "include": ["src"]
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "types": [],
+    "noEmit": true
+  },
+  "include": ["src", "worker-configuration.d.ts"]
 }

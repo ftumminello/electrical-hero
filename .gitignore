@@ -8,6 +8,8 @@ dist
 *.log
 ios
 android
+.wrangler
+.dev.vars
 .next
 next-env.d.ts
 *.tsbuildinfo

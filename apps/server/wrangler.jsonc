@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "electrical-hero-api",
+  "main": "src/index.ts",
+  "account_id": "f829b338b404de5d62877eed272edc9d",
+  "compatibility_date": "2026-09-01",
+  "observability": { "enabled": true },
+  "dev": { "port": 3000 },
+  "vars": {
+    "AI_MODEL": "@cf/openai/gpt-oss-120b",
+    "COMPANY_ID": "co-kestrel"
+  },
+  "ai": { "binding": "AI" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "electrical-hero",
+      "database_id": "7a299c59-4e8c-4e29-8c0a-98e32c09a532",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    { "binding": "CLIENT_CONFIGS", "bucket_name": "eh-client-configs" },
+    { "binding": "COMPANY_RULES", "bucket_name": "eh-company-rules" },
+    { "binding": "SCENARIO_TEMPLATES", "bucket_name": "eh-scenario-templates" }
+  ]
+}

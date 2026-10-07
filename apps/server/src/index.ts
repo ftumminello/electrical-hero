@@ -1,18 +1,29 @@
-import express from "express";
-import cors from "cors";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { APP_NAME, type HealthResponse } from "@electrical-hero/shared";
+import type { AppEnv } from "./env";
+import { errorResponse } from "./http";
+import { accounts } from "./routes/accounts";
+import { rules } from "./routes/rules";
+import { scenarios } from "./routes/scenarios";
+import { sessions } from "./routes/sessions";
+import { templates } from "./routes/templates";
 
-const app = express();
-const port = Number(process.env.PORT ?? 3000);
+const app = new Hono<AppEnv>();
 
-app.use(cors());
-app.use(express.json());
+app.use("*", cors());
+app.onError(errorResponse);
+app.notFound((c) => c.json({ error: "Not found" }, 404));
 
-app.get("/health", (_req, res) => {
+app.get("/health", (c) => {
   const body: HealthResponse = { status: "ok", app: APP_NAME };
-  res.json(body);
+  return c.json(body);
 });
 
-app.listen(port, () => {
-  console.log(`${APP_NAME} server listening on http://localhost:${port}`);
-});
+app.route("/accounts", accounts);
+app.route("/rules", rules);
+app.route("/scenario-templates", templates);
+app.route("/scenarios", scenarios);
+app.route("/sessions", sessions);
+
+export default app;

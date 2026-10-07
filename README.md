@@ -1,6 +1,6 @@
 # Electrical Hero
 
-Monorepo with native (Expo Router / React Native), web (Next.js), and server (Express) apps. UI is shared through
+Monorepo with native (Expo Router / React Native), web (Next.js), and server (Cloudflare Worker) apps. UI is shared through
 platform-split packages and styled with Tailwind (web) and NativeWind (native) from one design-system preset.
 
 ## Structure
@@ -9,7 +9,7 @@ platform-split packages and styled with Tailwind (web) and NativeWind (native) f
 apps/
   native/         Expo Router app (iOS / Android), Metro + NativeWind
   web/            Next.js app (Turbopack), Tailwind CSS
-  server/         Express API (TypeScript)
+  server/         Cloudflare Worker API (Hono, D1, R2, Workers AI)
 packages/
   design-system/  Volt Academy tokens + the shared Tailwind preset
   core/           Shared UI components, providers, hooks (.web / .native splits)
@@ -37,6 +37,22 @@ pnpm dev:native     # Expo dev server; scan the QR code with Expo Go
 
 On a physical device, point the native app at your machine:
 `EXPO_PUBLIC_API_URL=http://<your-lan-ip>:3000 pnpm dev:native`
+
+## Backend (Cloudflare)
+
+Deployed API: https://electrical-hero-api.electrical-hero.workers.dev (no auth; hackathon demo). Frontend guide: [`docs/api/README.md`](docs/api/README.md); OpenAPI spec: [`docs/api/openapi.yaml`](docs/api/openapi.yaml); TypeScript types: `packages/shared`.
+
+Wrangler authenticates with the account-scoped token in `apps/server/.env` (gitignored), so run these from the repo root via pnpm:
+
+```sh
+pnpm --filter @electrical-hero/server test        # unit tests (vitest)
+pnpm --filter @electrical-hero/server deploy      # wrangler deploy
+pnpm --filter @electrical-hero/server db:migrate  # apply D1 migrations (remote)
+pnpm --filter @electrical-hero/server seed        # upload seed markdown to R2 + upsert D1 rows (remote)
+bash apps/server/scripts/smoke.sh https://electrical-hero-api.electrical-hero.workers.dev
+```
+
+`pnpm dev:server` runs `wrangler dev` with local (empty) D1/R2; point clients at the deployed URL to work with seeded data.
 
 ## Design system
 
