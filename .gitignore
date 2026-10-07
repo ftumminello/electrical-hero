@@ -8,3 +8,5 @@ dist
 *.log
 ios
 android
+.next
+next-env.d.ts
