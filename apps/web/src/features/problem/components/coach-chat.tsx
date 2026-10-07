@@ -39,7 +39,8 @@ export function CoachChat({
 }: CoachChatProps) {
   const [draft, setDraft] = useState("");
   const [hint, setHint] = useState<string | null>(null);
-  const endRef = useRef<HTMLDivElement>(null);
+  const conversationRef = useRef<HTMLDivElement>(null);
+  const followReplyRef = useRef(true);
   const isStreaming = streamingReply !== null;
   const isBusy = isStreaming || isGrading;
 
@@ -48,7 +49,11 @@ export function CoachChat({
   );
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    const conversation = conversationRef.current;
+    if (conversation && followReplyRef.current) {
+      // Scroll only the transcript; keep the composer and the page in place.
+      conversation.scrollTop = conversation.scrollHeight;
+    }
   }, [messages.length, streamingReply]);
 
   const send = async (content: string, fromDraft: boolean) => {
@@ -57,6 +62,7 @@ export function CoachChat({
       return;
     }
     speech.stop();
+    followReplyRef.current = true;
     setHint(null);
     if (fromDraft) setDraft("");
     const ok = await onSend(content);
@@ -67,8 +73,11 @@ export function CoachChat({
   const error = hint ?? sendError ?? speech.error ?? gradeError;
 
   return (
-    <section aria-labelledby="chat-heading" className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
+    <section
+      aria-labelledby="chat-heading"
+      className="flex h-[min(44rem,85dvh)] min-h-[32rem] min-w-0 flex-col overflow-hidden rounded border border-border bg-surface-200"
+    >
+      <div className="flex shrink-0 flex-col gap-1 border-b border-border p-4">
         <Text variant="eyebrow" className="text-ink-muted">
           {mode === "scenario" ? "Work the call" : "Ask the account lead"}
         </Text>
@@ -77,40 +86,56 @@ export function CoachChat({
         </h2>
       </div>
 
-      {messages.length === 0 && !isStreaming && (
-        <Text className="text-ink-muted">
-          Start with what you want to know, like “Where do I isolate the main panel?” or “What hazards are on this
-          site?”
-        </Text>
-      )}
-
-      <ol aria-live="polite" className="flex flex-col gap-3">
-        {messages.map((message) => {
-          const { label, text } = messageSpeaker(message, mode);
-          return (
-            <ChatBubble key={message.id} from={message.role === "user" ? "learner" : "tutor"} label={label}>
-              {message.role === "user" ? <Text>{text}</Text> : <Markdown content={text} />}
-            </ChatBubble>
-          );
-        })}
-        {isStreaming && (
-          <ChatBubble from="tutor" label={mode === "scenario" ? "Dispatch" : "Account lead"}>
-            {streamingReply ? (
-              <Markdown
-                content={
-                  messageSpeaker({ id: "", role: "assistant", content: streamingReply, createdAt: "" }, mode).text
-                }
-              />
-            ) : (
-              <StatusBadge status="pending" label="Thinking" />
-            )}
-          </ChatBubble>
+      <div
+        ref={conversationRef}
+        role="region"
+        aria-label="Conversation"
+        tabIndex={0}
+        onScroll={(event) => {
+          const conversation = event.currentTarget;
+          followReplyRef.current = conversation.scrollHeight - conversation.scrollTop - conversation.clientHeight < 48;
+        }}
+        className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain p-4 [scrollbar-gutter:stable] focus-visible:-outline-offset-2"
+      >
+        {messages.length === 0 && !isStreaming && (
+          <Text className="text-ink-muted">
+            Start with what you want to know, like “Where do I isolate the main panel?” or “What hazards are on this
+            site?”
+          </Text>
         )}
-      </ol>
+
+        <ol aria-live="polite" className="flex min-w-0 flex-col gap-3">
+          {messages.map((message) => {
+            const { label, text } = messageSpeaker(message, mode);
+            return (
+              <ChatBubble key={message.id} from={message.role === "user" ? "learner" : "tutor"} label={label}>
+                {message.role === "user" ? (
+                  <Text className="whitespace-pre-wrap">{text}</Text>
+                ) : (
+                  <Markdown content={text} />
+                )}
+              </ChatBubble>
+            );
+          })}
+          {isStreaming && (
+            <ChatBubble from="tutor" label={mode === "scenario" ? "Dispatch" : "Account lead"}>
+              {streamingReply ? (
+                <Markdown
+                  content={
+                    messageSpeaker({ id: "", role: "assistant", content: streamingReply, createdAt: "" }, mode).text
+                  }
+                />
+              ) : (
+                <StatusBadge status="pending" label="Thinking" />
+              )}
+            </ChatBubble>
+          )}
+        </ol>
+      </div>
 
       {!isCompleted && (
         <form
-          className="flex flex-col gap-3"
+          className="flex max-h-[70%] shrink-0 flex-col gap-3 overflow-y-auto overscroll-contain border-t border-border p-4"
           onSubmit={(event) => {
             event.preventDefault();
             void send(draft, true);
@@ -146,7 +171,7 @@ export function CoachChat({
             }
           />
           {error && (
-            <Text variant="small" className="text-line-red">
+            <Text variant="small" className="max-h-20 overflow-y-auto text-line-red [overflow-wrap:anywhere]">
               <span role="alert">{error}</span>
             </Text>
           )}
@@ -171,7 +196,6 @@ export function CoachChat({
           </div>
         </form>
       )}
-      <div ref={endRef} />
     </section>
   );
 }

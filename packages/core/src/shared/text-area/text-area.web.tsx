@@ -23,11 +23,16 @@ export const TextArea = ({
   const hintId = hint ? `${fieldId}-hint` : undefined;
 
   return (
-    <div className={cn(FIELD, "flex flex-col", className)}>
+    <div className={cn(FIELD, "flex min-w-0 flex-col", className)}>
       <label htmlFor={fieldId} className={cn("type-label", FIELD_LABEL)}>
         {label}
       </label>
-      <div className={cn(FIELD_BOX, "focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus-ring")}>
+      <div
+        className={cn(
+          FIELD_BOX,
+          "focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus-ring",
+        )}
+      >
         <textarea
           id={fieldId}
           value={value}
@@ -44,7 +49,7 @@ export const TextArea = ({
           }}
           className={cn(
             FIELD_INPUT,
-            "block resize-y bg-transparent placeholder:text-ink-muted focus-visible:outline-none disabled:opacity-50",
+            "block min-w-0 resize-none overflow-y-auto bg-transparent [overflow-wrap:anywhere] placeholder:text-ink-muted focus-visible:outline-none disabled:opacity-50",
           )}
         />
         {accessory && <div className={cn(FIELD_ACCESSORY, "flex")}>{accessory}</div>}

@@ -34,7 +34,7 @@ const inline = (text: string): ReactNode =>
 const HEADING_TAG = { 2: "h2", 3: "h3", 4: "h4", 5: "h5", 6: "h6" } as const;
 
 export const Markdown = ({ content, baseHeadingLevel = 3, className }: MarkdownProps) => (
-  <div className={cn(MARKDOWN, "flex flex-col", className)}>
+  <div className={cn(MARKDOWN, "flex min-w-0 max-w-full flex-col [overflow-wrap:anywhere]", className)}>
     {parseMarkdown(content).map((block, i) => {
       switch (block.kind) {
         case "heading": {
@@ -52,18 +52,20 @@ export const Markdown = ({ content, baseHeadingLevel = 3, className }: MarkdownP
           return (
             <ul key={i} className={cn(LIST, "flex flex-col")}>
               {block.items.map((item, j) => (
-                <li key={j} className={LIST_ITEM} style={{ paddingLeft: item.indent * 16 }}>
-                  <span aria-hidden className={LIST_BULLET}>
+                <li key={j} className={cn(LIST_ITEM, "min-w-0")} style={{ paddingLeft: item.indent * 16 }}>
+                  <span aria-hidden className={cn(LIST_BULLET, "shrink-0")}>
                     •
                   </span>
-                  <Text as="span">{inline(item.text)}</Text>
+                  <Text as="span" className="min-w-0 flex-1">
+                    {inline(item.text)}
+                  </Text>
                 </li>
               ))}
             </ul>
           );
         case "table":
           return (
-            <div key={i} className="overflow-x-auto rounded border border-border">
+            <div key={i} className="min-w-0 max-w-full overflow-x-auto rounded border border-border">
               <table className="w-full border-collapse type-small">
                 <thead>
                   <tr>
