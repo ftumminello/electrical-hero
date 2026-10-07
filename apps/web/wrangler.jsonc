@@ -11,7 +11,8 @@
   // Workers custom domains: Cloudflare creates the DNS records and certificates on deploy.
   "routes": [
     { "pattern": "electrical-hero.com", "custom_domain": true },
-    { "pattern": "www.electrical-hero.com", "custom_domain": true }
+    { "pattern": "www.electrical-hero.com", "custom_domain": true },
+    { "pattern": "admin.electrical-hero.com", "custom_domain": true }
   ],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "electrical-hero-web" }]

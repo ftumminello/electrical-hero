@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSelectedLayoutSegment } from "next/navigation";
 import { APP_NAME } from "@electrical-hero/shared";
 import { cn } from "@electrical-hero/design-system/cn";
 import { Trophy, UserRound, Zap } from "@electrical-hero/core/icons";
@@ -20,6 +20,10 @@ const NAV = [
 
 export function AppHeader() {
   const pathname = usePathname();
+  // The admin area (admin.electrical-hero.com) renders its own header. The segment reflects the route
+  // actually rendered, so this also holds when the host rewrite serves /admin at "/".
+  const segment = useSelectedLayoutSegment();
+  if (segment === "admin") return null;
 
   return (
     <header className="bg-surface-inverse">
