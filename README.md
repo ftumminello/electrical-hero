@@ -54,6 +54,19 @@ bash apps/server/scripts/smoke.sh https://electrical-hero-api.electrical-hero.wo
 
 `pnpm dev:server` runs `wrangler dev` with local (empty) D1/R2; point clients at the deployed URL to work with seeded data.
 
+## Web (Cloudflare)
+
+Live at **https://electrical-hero.com** (also `www.` and `https://electrical-hero-web.electrical-hero.workers.dev`). The Next.js app runs on Cloudflare Workers through the OpenNext adapter (`apps/web/wrangler.jsonc`, `apps/web/open-next.config.ts`). The custom domains, DNS records and certificates are managed by Cloudflare; the zone forces HTTPS with TLS 1.2+.
+
+```sh
+cd apps/web
+set -a && . ../server/.env && set +a     # the account-scoped deploy token
+pnpm run deploy                          # opennextjs-cloudflare build && deploy
+pnpm run preview                         # same build, served locally in the Workers runtime
+```
+
+`patches/@opennextjs__cloudflare@1.20.9.patch` makes the adapter inline `preview-props.json`, which Next 16.4 reads at startup. Drop the patch once an adapter release includes it.
+
 ## Design system
 
 The Volt Academy design system lives in `.claude/design-system/`. Its `tokens.json` is the source of truth; run
