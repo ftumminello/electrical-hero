@@ -13,3 +13,4 @@ android
 .next
 next-env.d.ts
 *.tsbuildinfo
+.open-next
