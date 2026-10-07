@@ -83,3 +83,26 @@ describe("prompt hardening (final review)", () => {
     expect(system.content).toContain("must be copied exactly from the site file");
   });
 });
+
+describe("reference material in prompts", () => {
+  const template = {
+    id: "tmpl-a", title: "t", difficulty: "beginner" as const, requires: [], skills: [], rules: [], protocols: ["sp-loto"], instructions: "x",
+  };
+
+  it("adds safety protocols and local code to the site block only when given", () => {
+    const bare = briefingSystemPrompt(site);
+    expect(bare).not.toContain("=== SAFETY PROTOCOLS ===");
+    expect(bare).not.toContain("=== LOCAL CODE ===");
+    const [system] = scenarioGenerationMessages(
+      { ...site, protocolsMarkdown: "### LOTO (sp-loto)", codeSpecMarkdown: "WA adopts the 2023 NEC" },
+      template,
+    );
+    expect(system.content).toContain("=== SAFETY PROTOCOLS ===\n### LOTO (sp-loto)");
+    expect(system.content).toContain("=== LOCAL CODE ===\nWA adopts the 2023 NEC");
+  });
+
+  it("the grounding rule allows protocols and local code as sources", () => {
+    expect(GROUNDING_RULE).toContain("SAFETY PROTOCOLS");
+    expect(GROUNDING_RULE).toContain("LOCAL CODE");
+  });
+});

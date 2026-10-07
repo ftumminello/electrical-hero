@@ -8,12 +8,15 @@ export interface SiteContext {
   address: string;
   configMarkdown: string;
   rulesMarkdown: string;
+  /** Only loaded for scenario generation and debriefs, to keep chat turns cheap. */
+  protocolsMarkdown?: string;
+  codeSpecMarkdown?: string;
 }
 
 export type ScenarioForPrompt = ScenarioHidden & { title: string; briefing: string };
 
 export const GROUNDING_RULE =
-  "Only state facts that appear in the SITE FILE, COMPANY RULES, or SCENARIO in this prompt. If something is not there, say it is not in the site records. Never invent equipment, readings, settings, or history.";
+  "Only state facts that appear in the SITE FILE, COMPANY RULES, SAFETY PROTOCOLS, LOCAL CODE, or SCENARIO in this prompt. If something is not there, say it is not in the site records. Never invent equipment, readings, settings, or history.";
 
 const bullets = (items: string[]): string => (items.length ? items.map((i) => `- ${i}`).join("\n") : "- (none)");
 
@@ -22,6 +25,8 @@ function siteBlock(site: SiteContext): string {
     `SITE: ${site.accountName}, ${site.address}`,
     `=== SITE FILE ===\n${site.configMarkdown.trim()}`,
     `=== COMPANY RULES ===\n${site.rulesMarkdown.trim()}`,
+    ...(site.protocolsMarkdown ? [`=== SAFETY PROTOCOLS ===\n${site.protocolsMarkdown.trim()}`] : []),
+    ...(site.codeSpecMarkdown ? [`=== LOCAL CODE ===\n${site.codeSpecMarkdown.trim()}`] : []),
   ].join("\n\n");
 }
 

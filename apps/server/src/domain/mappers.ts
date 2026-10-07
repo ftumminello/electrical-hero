@@ -60,8 +60,10 @@ export interface MessageRow {
   created_at: string;
 }
 
-/** The parts of a generated scenario that only the AI may see. */
-export type ScenarioHidden = Pick<GeneratedScenario, "hiddenFacts" | "expectedApproach" | "rubric" | "redFlags">;
+/** The parts of a generated scenario that only the AI may see, plus the safety protocols it was built on. */
+export type ScenarioHidden = Pick<GeneratedScenario, "hiddenFacts" | "expectedApproach" | "rubric" | "redFlags"> & {
+  protocolIds: string[];
+};
 
 export function parseFeatures(json: string): string[] {
   try {
@@ -107,14 +109,19 @@ export function toScenarioPublic(r: ScenarioRow): ScenarioPublic {
   };
 }
 
-export const scenarioHidden = (r: ScenarioRow): ScenarioHidden => JSON.parse(r.hidden_json) as ScenarioHidden;
+export function scenarioHidden(r: ScenarioRow): ScenarioHidden {
+  const hidden = JSON.parse(r.hidden_json) as Partial<ScenarioHidden>;
+  // Scenarios generated before safety protocols existed carry no protocolIds.
+  return { ...(hidden as ScenarioHidden), protocolIds: hidden.protocolIds ?? [] };
+}
 
-export function hiddenJson(g: GeneratedScenario): string {
+export function hiddenJson(g: GeneratedScenario, protocolIds: string[]): string {
   const hidden: ScenarioHidden = {
     hiddenFacts: g.hiddenFacts,
     expectedApproach: g.expectedApproach,
     rubric: g.rubric,
     redFlags: g.redFlags,
+    protocolIds,
   };
   return JSON.stringify(hidden);
 }

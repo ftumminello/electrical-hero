@@ -42,7 +42,7 @@ export const scenarios = new Hono<AppEnv>()
       title: generated.title,
       difficulty: template.difficulty,
       briefing: generated.briefing,
-      hidden_json: hiddenJson(generated),
+      hidden_json: hiddenJson(generated, template.protocols),
       created_at: now(),
     };
     await insertScenario(c.env.DB, row);
