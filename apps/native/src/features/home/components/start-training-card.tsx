@@ -30,7 +30,7 @@ export function StartTrainingCard({ account }: { account: AccountDetail }) {
   return (
     <Card className="gap-4">
       <Text variant="eyebrow" className="text-ink-muted">
-        Next problem
+        Problem
       </Text>
       <Text variant="heading">{account.name}</Text>
       <Text variant="small" className="text-ink-muted">
@@ -46,21 +46,23 @@ export function StartTrainingCard({ account }: { account: AccountDetail }) {
         You'll get a random service call at this site, written from its real site file and the company's work rules.
       </Text>
 
-      <View className="gap-3">
-        <Button
-          label="Start next problem"
-          isPending={isStarting && mode === "scenario"}
-          disabled={isStarting}
-          onPress={() => begin("scenario")}
-        />
-        <Button
-          variant="secondary"
-          label="Ask about this site first"
-          isPending={isStarting && mode === "briefing"}
-          disabled={isStarting}
-          onPress={() => begin("briefing")}
-        />
-      </View>
+      {phase !== "generating" && (
+        <View className="gap-3">
+          <Button
+            label="Start"
+            isPending={isStarting && mode === "scenario"}
+            disabled={isStarting}
+            onPress={() => begin("scenario")}
+          />
+          <Button
+            variant="secondary"
+            label="Ask about this site first"
+            isPending={isStarting && mode === "briefing"}
+            disabled={isStarting}
+            onPress={() => begin("briefing")}
+          />
+        </View>
+      )}
       {isStarting && <StatusBadge status="pending" label={PHASE_LABEL[phase]} />}
       {error && (
         <View accessibilityRole="alert">
