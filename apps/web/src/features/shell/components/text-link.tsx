@@ -1,16 +1,18 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { cn } from "@electrical-hero/design-system/cn";
-import { ChevronRight } from "@electrical-hero/core/icons";
+import { ChevronLeft, ChevronRight } from "@electrical-hero/core/icons";
 
 type TextLinkProps = {
   href: string;
   children: ReactNode;
   className?: string;
+  /** Renders a left-pointing chevron before the label, for back navigation. */
+  back?: boolean;
 };
 
 /** Inline navigation link in neutral-blue, the design system's link color. */
-export function TextLink({ href, children, className }: TextLinkProps) {
+export function TextLink({ href, children, className, back }: TextLinkProps) {
   return (
     <Link
       href={href}
@@ -19,8 +21,9 @@ export function TextLink({ href, children, className }: TextLinkProps) {
         className,
       )}
     >
+      {back && <ChevronLeft aria-hidden size={16} strokeWidth={2} />}
       {children}
-      <ChevronRight aria-hidden size={16} strokeWidth={2} />
+      {!back && <ChevronRight aria-hidden size={16} strokeWidth={2} />}
     </Link>
   );
 }

@@ -9,11 +9,11 @@ import { Card } from "@electrical-hero/core/shared/card";
 import { StatusBadge } from "@electrical-hero/core/shared/status-badge";
 import { Text } from "@electrical-hero/core/shared/text";
 import { useStartTraining } from "@electrical-hero/core/hooks/use-start-training";
+import { DISPATCH_VERBS, useCyclingText } from "@electrical-hero/core/hooks/use-cycling-text";
 import { formatAddress } from "@electrical-hero/core/lib/training";
 
 const PHASE_LABEL = {
   idle: "",
-  generating: "Dispatch is writing your call. This takes up to 40 seconds.",
   starting: "Opening the job",
 };
 
@@ -21,6 +21,7 @@ export function StartTrainingCard({ account }: { account: AccountDetail }) {
   const router = useRouter();
   const { start, phase, isStarting, error } = useStartTraining();
   const [mode, setMode] = useState<"scenario" | "briefing">("scenario");
+  const dispatchVerb = useCyclingText(DISPATCH_VERBS, phase === "generating");
 
   const begin = async (next: "scenario" | "briefing") => {
     setMode(next);
@@ -72,7 +73,12 @@ export function StartTrainingCard({ account }: { account: AccountDetail }) {
         </div>
       )}
       <div aria-live="polite">
-        {isStarting && <StatusBadge status="pending" label={PHASE_LABEL[phase]} />}
+        {isStarting && (
+          <StatusBadge
+            status="pending"
+            label={phase === "generating" ? `${dispatchVerb}… (up to 40 s)` : PHASE_LABEL[phase]}
+          />
+        )}
         {error && (
           <Text variant="small" className="text-line-red">
             <span role="alert">{error}</span>

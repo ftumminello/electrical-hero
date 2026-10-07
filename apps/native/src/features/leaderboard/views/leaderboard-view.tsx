@@ -62,7 +62,7 @@ export function LeaderboardView() {
         </View>
       </View>
 
-      <TextLink href="/account">Back to your account</TextLink>
+      <TextLink href="/account" back>Back to your account</TextLink>
     </Screen>
   );
 }
