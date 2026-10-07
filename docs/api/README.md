@@ -3,7 +3,7 @@
 - **Spec:** [`openapi.yaml`](./openapi.yaml) (OpenAPI 3.1). Import it into Postman, Insomnia or Swagger UI, or generate a client from it.
 - **Types:** `import type { … } from "@electrical-hero/shared"`. These are the same shapes the server returns.
 - **Base URL:** `https://electrical-hero-api.electrical-hero.workers.dev`
-  - Vite dev: call `/api/...`, which the dev server proxies to `http://localhost:3000`.
+  - Next.js dev (`apps/web`): call `/api/...`, which `next.config.ts` rewrites to `http://localhost:3000`.
   - Expo: set `EXPO_PUBLIC_API_URL` to the deployed URL. Local `wrangler dev` has empty storage.
 - **No auth.** Errors are always `{ "error": string }`, readable enough to show to the user.
 

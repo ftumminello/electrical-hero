@@ -10,10 +10,15 @@
     "test": "turbo run test",
     "dev:web": "pnpm --filter @electrical-hero/web dev",
     "dev:server": "pnpm --filter @electrical-hero/server dev",
-    "dev:native": "pnpm --filter @electrical-hero/native start"
+    "dev:native": "pnpm --filter @electrical-hero/native start",
+    "verify": "turbo run build typecheck",
+    "tokens": "pnpm --filter @electrical-hero/design-system tokens",
+    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,css,json,md}\""
   },
   "devDependencies": {
     "turbo": "^2.11.7",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "prettier": "^3.9.9",
+    "prettier-plugin-tailwindcss": "^0.8.1"
   }
 }

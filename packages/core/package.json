@@ -1,0 +1,63 @@
+{
+  "name": "@electrical-hero/core",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./*": "./src/*/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.native.json"
+  },
+  "dependencies": {
+    "@electrical-hero/design-system": "workspace:*",
+    "@electrical-hero/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "@react-native-async-storage/async-storage": "*",
+    "lucide-react": "^1.52.0",
+    "lucide-react-native": "^1.52.0",
+    "nativewind": "^4.2.7",
+    "react": "*",
+    "react-native": "*",
+    "react-native-css-interop": "0.2.7",
+    "react-native-svg": "^15.15.4"
+  },
+  "peerDependenciesMeta": {
+    "@react-native-async-storage/async-storage": {
+      "optional": true
+    },
+    "lucide-react": {
+      "optional": true
+    },
+    "lucide-react-native": {
+      "optional": true
+    },
+    "nativewind": {
+      "optional": true
+    },
+    "react-native": {
+      "optional": true
+    },
+    "react-native-css-interop": {
+      "optional": true
+    },
+    "react-native-svg": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@types/react": "~19.2.14",
+    "lucide-react": "^1.52.0",
+    "lucide-react-native": "^1.52.0",
+    "nativewind": "4.2.7",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-css-interop": "0.2.7",
+    "react-native-reanimated": "4.5.1",
+    "react-native-svg": "15.15.4",
+    "react-native-worklets": "0.10.1",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^7.0.2"
+  }
+}

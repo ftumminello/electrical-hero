@@ -2,8 +2,10 @@
   "expo": {
     "name": "Electrical Hero",
     "slug": "electrical-hero",
+    "scheme": "electricalhero",
     "version": "0.0.0",
     "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "com.electricalhero.app"
     },
@@ -11,7 +13,20 @@
       "package": "com.electricalhero.app"
     },
     "plugins": [
-      "expo-status-bar"
-    ]
+      "expo-router",
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F7F5F0",
+          "dark": {
+            "backgroundColor": "#14161A"
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "reactCompiler": true
+    }
   }
 }

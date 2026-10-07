@@ -1,0 +1,27 @@
+{
+  "name": "@electrical-hero/design-system",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./tailwind-preset": {
+      "types": "./tailwind-preset.d.ts",
+      "default": "./tailwind-preset.js"
+    },
+    "./*": "./src/*/index.ts"
+  },
+  "scripts": {
+    "tokens": "node scripts/generate-tokens.mjs",
+    "typecheck": "node scripts/generate-tokens.mjs --check && tsc --noEmit"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.6.1"
+  },
+  "peerDependencies": {
+    "tailwindcss": "^3.4.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.19",
+    "typescript": "^7.0.2"
+  }
+}
