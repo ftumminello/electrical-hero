@@ -2,9 +2,9 @@ import type { Difficulty } from "@electrical-hero/shared";
 
 // Filled bars plus the level's name, so difficulty is never shown by color alone.
 export const DIFFICULTY: Record<Difficulty, { label: string; level: number }> = {
-  apprentice: { label: "Apprentice", level: 1 },
-  journeyman: { label: "Journeyman", level: 2 },
-  master: { label: "Master", level: 3 },
+  beginner: { label: "Beginner", level: 1 },
+  intermediate: { label: "Intermediate", level: 2 },
+  advanced: { label: "Advanced", level: 3 },
 };
 
 export const DIFFICULTY_LEVELS = [1, 2, 3] as const;

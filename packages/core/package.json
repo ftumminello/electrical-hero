@@ -14,6 +14,7 @@
   },
   "peerDependencies": {
     "@react-native-async-storage/async-storage": "*",
+    "expo": "*",
     "lucide-react": "^1.52.0",
     "lucide-react-native": "^1.52.0",
     "nativewind": "^4.2.7",
@@ -24,6 +25,9 @@
   },
   "peerDependenciesMeta": {
     "@react-native-async-storage/async-storage": {
+      "optional": true
+    },
+    "expo": {
       "optional": true
     },
     "lucide-react": {
@@ -48,6 +52,7 @@
   "devDependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
     "@types/react": "~19.2.14",
+    "expo": "57.0.27",
     "lucide-react": "^1.52.0",
     "lucide-react-native": "^1.52.0",
     "nativewind": "4.2.7",

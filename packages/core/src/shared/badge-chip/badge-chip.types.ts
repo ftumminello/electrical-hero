@@ -1,4 +1,4 @@
-import type { BadgeIcon } from "@electrical-hero/shared";
+export type BadgeIcon = "shield" | "zap" | "award" | "flame" | "book" | "hard-hat";
 
 export type BadgeChipProps = {
   /** The badge's name, always shown as words. */

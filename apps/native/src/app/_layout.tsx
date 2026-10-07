@@ -12,7 +12,10 @@ import { BarlowCondensed_700Bold } from "@expo-google-fonts/barlow-condensed/700
 import { Inter_400Regular } from "@expo-google-fonts/inter/400Regular";
 import { Inter_600SemiBold } from "@expo-google-fonts/inter/600SemiBold";
 import { JetBrainsMono_500Medium } from "@expo-google-fonts/jetbrains-mono/500Medium";
+import { ApiProvider } from "@electrical-hero/core/providers/api-provider";
 import { ThemeProvider, useTheme } from "@electrical-hero/core/providers/theme-provider";
+import { TraineeProvider } from "@electrical-hero/core/providers/trainee-provider";
+import { API_URL } from "../lib/api";
 
 // Keep the native splash up until fonts and the saved theme are loaded.
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -52,7 +55,11 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <RootStack />
+        <ApiProvider baseUrl={API_URL}>
+          <TraineeProvider>
+            <RootStack />
+          </TraineeProvider>
+        </ApiProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

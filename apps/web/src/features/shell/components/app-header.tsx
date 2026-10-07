@@ -8,7 +8,7 @@ import { Trophy, UserRound, Zap } from "@electrical-hero/core/icons";
 import { Text } from "@electrical-hero/core/shared/text";
 
 const NAV = [
-  { href: "/", label: "Problems", icon: Zap, matches: (path: string) => path === "/" || path.startsWith("/problem") },
+  { href: "/", label: "Train", icon: Zap, matches: (path: string) => path === "/" || path.startsWith("/session") },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy, matches: (path: string) => path === "/leaderboard" },
   {
     href: "/account",
