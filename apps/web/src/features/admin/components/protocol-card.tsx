@@ -12,6 +12,8 @@ import { ErrorState, LoadingState } from "@/features/shell/components/request-st
 
 type ProtocolCardProps = {
   protocol: SafetyProtocolSummary;
+  /** Human label for the protocol's category, shown above the title. */
+  categoryLabel: string;
   /** Names of the customer sites where this protocol applies. */
   siteNames: string[];
   totalSites: number;
@@ -24,7 +26,7 @@ const Chip = ({ children }: { children: string }) => (
   <span className="rounded-sm border border-border-strong px-2 py-0.5 text-ink type-spec">{children}</span>
 );
 
-export function ProtocolCard({ protocol, siteNames, totalSites }: ProtocolCardProps) {
+export function ProtocolCard({ protocol, categoryLabel, siteNames, totalSites }: ProtocolCardProps) {
   const api = useApi();
   const [open, setOpen] = useState(false);
   // Fetched only when opened: the list endpoint carries summaries, not the full procedure.
@@ -34,6 +36,9 @@ export function ProtocolCard({ protocol, siteNames, totalSites }: ProtocolCardPr
   return (
     <Card as="article" className="gap-4">
       <div className="flex flex-col gap-1">
+        <Text variant="eyebrow" className="text-ink-muted">
+          {categoryLabel}
+        </Text>
         <Text as="h3" variant="heading">
           {protocol.title}
         </Text>

@@ -34,8 +34,12 @@ export function SafetyProtocolsView() {
   const companyName = rules.data ? companyNameFromRules(rules.data.markdown) : null;
   const sites = accounts.data ?? [];
   const list = protocols.data ?? [];
-  const everywhere = list.filter((p) => p.appliesTo.length === 0).length;
-  const categories = [...new Set(list.map((p) => p.category))];
+  // Two balanced groups read better than one section per category (most categories hold a single protocol).
+  const groups = [
+    { id: "every-site", title: "Required at every site", items: list.filter((p) => p.appliesTo.length === 0) },
+    { id: "site-equipment", title: "Depends on site equipment", items: list.filter((p) => p.appliesTo.length > 0) },
+  ];
+  const everywhere = groups[0].items.length;
 
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-12 px-4 py-8 md:px-6 md:py-12">
@@ -62,25 +66,25 @@ export function SafetyProtocolsView() {
       {protocols.isLoading && <LoadingState label="Loading safety protocols" />}
       {protocols.error && <ErrorState message={protocols.error} onRetry={protocols.reload} />}
 
-      {categories.map((category) => (
-        <section key={category} aria-labelledby={`cat-${category}`} className="flex flex-col gap-4">
-          <SectionHeading id={`cat-${category}`} title={categoryLabel(category)} />
-          <div className="grid gap-4 lg:grid-cols-2">
-            {list
-              .filter((p) => p.category === category)
-              .map((protocol) => (
+      {protocols.data &&
+        groups.map((group) => (
+          <section key={group.id} aria-labelledby={group.id} className="flex flex-col gap-4">
+            <SectionHeading id={group.id} eyebrow={`${group.items.length} protocols`} title={group.title} />
+            <div className="grid gap-4 lg:grid-cols-2">
+              {group.items.map((protocol) => (
                 <ProtocolCard
                   key={protocol.id}
                   protocol={protocol}
+                  categoryLabel={categoryLabel(protocol.category)}
                   totalSites={sites.length}
                   siteNames={sites
                     .filter((site) => protocol.appliesTo.every((f) => site.features.includes(f)))
                     .map((site) => site.name)}
                 />
               ))}
-          </div>
-        </section>
-      ))}
+            </div>
+          </section>
+        ))}
     </main>
   );
 }
