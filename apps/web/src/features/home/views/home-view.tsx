@@ -15,6 +15,7 @@ import { TraineeNameForm } from "@/features/training/components/trainee-name-for
 import { TrainingHistoryList } from "@/features/training/components/training-history-list";
 import { SitePicker } from "../components/site-picker";
 import { StartTrainingCard } from "../components/start-training-card";
+import { DemoQrCode } from "../components/demo-qr-code";
 
 export function HomeView() {
   const api = useApi();
@@ -32,7 +33,8 @@ export function HomeView() {
 
   return (
     <>
-      <section className="bg-surface-inverse">
+      <section className="relative bg-surface-inverse">
+        <DemoQrCode />
         <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-12 md:px-6">
           <Text variant="eyebrow" className="text-voltage">
             {companyName ?? "Field training"}
