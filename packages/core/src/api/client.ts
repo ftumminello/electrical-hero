@@ -6,6 +6,8 @@ import type {
   CreateScenarioRequest,
   CreateSessionRequest,
   Debrief,
+  SafetyProtocol,
+  SafetyProtocolSummary,
   ScenarioPublic,
   ScenarioTemplateSummary,
   SessionDetail,
@@ -55,6 +57,9 @@ export function createApiClient(baseUrl: string) {
     listAccounts: () => request<AccountSummary[]>("/accounts"),
     getAccount: (accountId: string) => request<AccountDetail>(`/accounts/${encodeURIComponent(accountId)}`),
     getRules: () => request<CompanyRules>("/rules"),
+    listSafetyProtocols: () => request<SafetyProtocolSummary[]>("/safety-protocols"),
+    getSafetyProtocol: (protocolId: string) =>
+      request<SafetyProtocol>(`/safety-protocols/${encodeURIComponent(protocolId)}`),
     listTemplates: (accountId?: string) =>
       request<ScenarioTemplateSummary[]>(
         accountId ? `/scenario-templates?accountId=${encodeURIComponent(accountId)}` : "/scenario-templates",

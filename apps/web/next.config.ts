@@ -12,8 +12,15 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return {
-      // admin.electrical-hero.com serves the admin page at its root. Only "/" is rewritten so /_next assets still resolve.
-      beforeFiles: [{ source: "/", has: [{ type: "host", value: ADMIN_HOST }], destination: "/admin" }],
+      // admin.electrical-hero.com serves the admin pages at its root. Only page paths are rewritten so /_next assets still resolve.
+      beforeFiles: [
+        { source: "/", has: [{ type: "host", value: ADMIN_HOST }], destination: "/admin" },
+        {
+          source: "/safety-protocols",
+          has: [{ type: "host", value: ADMIN_HOST }],
+          destination: "/admin/safety-protocols",
+        },
+      ],
       afterFiles: [{ source: "/api/:path*", destination: "http://localhost:3000/:path*" }],
       fallback: [],
     };

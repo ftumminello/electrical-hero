@@ -96,7 +96,10 @@ export function useAdminSettings() {
         if (state?.status !== "connected") return current;
         return {
           ...current,
-          integrations: { ...current.integrations, [id]: { ...state, lastSyncAt: new Date().toISOString(), matchedSites } },
+          integrations: {
+            ...current.integrations,
+            [id]: { ...state, lastSyncAt: new Date().toISOString(), matchedSites },
+          },
         };
       }),
     [update],
@@ -122,7 +125,8 @@ export function useAdminSettings() {
           : isPlausibleKey(key)
             ? {
                 ok: true,
-                message: "Key format looks right. TradesQuest isn't live yet, so it will connect automatically at launch.",
+                message:
+                  "Key format looks right. TradesQuest isn't live yet, so it will connect automatically at launch.",
                 at: new Date().toISOString(),
               }
             : {

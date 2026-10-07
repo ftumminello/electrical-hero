@@ -49,7 +49,8 @@ export function IntegrationCard({ integration, state, onConnect, onSync, onDisco
 
       {connected && state && (
         <p className="text-ink type-small">
-          {state.matchedSites ?? 0} customer sites matched · last synced {state.lastSyncAt ? formatTime(state.lastSyncAt) : "—"}
+          {state.matchedSites ?? 0} customer sites matched · last synced{" "}
+          {state.lastSyncAt ? formatTime(state.lastSyncAt) : "—"}
         </p>
       )}
 
@@ -60,7 +61,12 @@ export function IntegrationCard({ integration, state, onConnect, onSync, onDisco
             <Button variant="secondary" label="Disconnect" onPress={onDisconnect} />
           </>
         ) : (
-          <Button variant="secondary" label={connecting ? "Connecting" : `Connect ${name}`} isPending={connecting} onPress={onConnect} />
+          <Button
+            variant="secondary"
+            label={connecting ? "Connecting" : `Connect ${name}`}
+            isPending={connecting}
+            onPress={onConnect}
+          />
         )}
       </div>
     </Card>

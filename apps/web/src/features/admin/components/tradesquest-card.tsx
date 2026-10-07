@@ -46,8 +46,8 @@ export function TradesQuestCard({ tradesQuest, onSave, onRemove, onTest }: Trade
       </dl>
 
       <Callout tone="notice" label="Not live yet">
-        TradesQuest will serve its API from {TRADESQUEST_BASE_URL}. Until it launches, your key stays in this browser and
-        is never sent anywhere.
+        TradesQuest will serve its API from {TRADESQUEST_BASE_URL}. Until it launches, your key stays in this browser
+        and is never sent anywhere.
       </Callout>
 
       {apiKey ? (
@@ -97,7 +97,11 @@ export function TradesQuestCard({ tradesQuest, onSave, onRemove, onTest }: Trade
                 aria-label={reveal ? "Hide key" : "Show key"}
                 className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-sm text-ink-muted hover:text-ink"
               >
-                {reveal ? <EyeOff aria-hidden size={18} strokeWidth={2} /> : <Eye aria-hidden size={18} strokeWidth={2} />}
+                {reveal ? (
+                  <EyeOff aria-hidden size={18} strokeWidth={2} />
+                ) : (
+                  <Eye aria-hidden size={18} strokeWidth={2} />
+                )}
               </button>
             </div>
             <Button type="submit" label="Save key" disabled={!trimmed} />
