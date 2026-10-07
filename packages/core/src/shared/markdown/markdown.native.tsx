@@ -35,7 +35,7 @@ const inline = (text: string): ReactNode =>
 const CELL_WIDTH = 140;
 
 export const Markdown = ({ content, className }: MarkdownProps) => (
-  <View className={cn(MARKDOWN, className)}>
+  <View className={cn(MARKDOWN, "min-w-0 max-w-full", className)}>
     {parseMarkdown(content).map((block, i) => {
       switch (block.kind) {
         case "heading":
@@ -48,16 +48,22 @@ export const Markdown = ({ content, className }: MarkdownProps) => (
           return (
             <View key={i} className={LIST}>
               {block.items.map((item, j) => (
-                <View key={j} className={LIST_ITEM} style={{ paddingLeft: item.indent * 16 }}>
+                <View key={j} className={cn(LIST_ITEM, "min-w-0")} style={{ paddingLeft: item.indent * 16 }}>
                   <Text className={LIST_BULLET}>•</Text>
-                  <Text className="flex-1">{inline(item.text)}</Text>
+                  <Text className="min-w-0 flex-1">{inline(item.text)}</Text>
                 </View>
               ))}
             </View>
           );
         case "table":
           return (
-            <ScrollView key={i} horizontal className="rounded border border-border">
+            <ScrollView
+              key={i}
+              horizontal
+              nestedScrollEnabled
+              className="max-w-full rounded border border-border"
+              style={{ flexGrow: 0 }}
+            >
               <View>
                 {[block.header, ...block.rows].map((row, j) => (
                   <View key={j} className="flex-row">

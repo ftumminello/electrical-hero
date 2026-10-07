@@ -26,7 +26,9 @@ function PointList({
         {items.map((item, i) => (
           <li key={i} className="flex flex-row items-start gap-2">
             <Icon aria-hidden size={16} strokeWidth={2} className={`mt-1 shrink-0 ${iconClass}`} />
-            <Text as="span">{item}</Text>
+            <Text as="span" className="min-w-0 flex-1">
+              {item}
+            </Text>
           </li>
         ))}
       </ul>
@@ -38,7 +40,7 @@ export function DebriefCard({ debrief }: { debrief: Debrief }) {
   const passed = isPassing(debrief.score);
 
   return (
-    <Card as="section" className="gap-6">
+    <Card as="section" className="min-w-0 gap-6 [overflow-wrap:anywhere]">
       <div className="flex flex-col gap-3">
         <StatusBadge status={passed ? "success" : "error"} label={passed ? "Passed" : "Needs work"} />
         <div className="flex flex-row items-baseline gap-2">

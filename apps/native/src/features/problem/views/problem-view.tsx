@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,20 +15,14 @@ export function ProblemView({ sessionId }: { sessionId: string }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const scrollRef = useRef<ScrollView>(null);
   const training = useTrainingSession(sessionId);
   const { session } = training;
 
   return (
-    <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView
-        ref={scrollRef}
-        className="flex-1 bg-surface-100"
-        contentContainerClassName="gap-8 px-4 pb-12"
-        contentContainerStyle={{ paddingTop: insets.top + 8 }}
-        keyboardShouldPersistTaps="handled"
-        // Follow the reply while it streams in.
-        onContentSizeChange={() => training.isStreaming && scrollRef.current?.scrollToEnd({ animated: true })}
+    <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === "ios" ? "padding" : "height"}>
+      <View
+        className="min-h-0 flex-1 gap-4 bg-surface-100 px-4"
+        style={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 8 }}
       >
         <Pressable
           accessibilityRole="link"
@@ -47,18 +40,26 @@ export function ProblemView({ sessionId }: { sessionId: string }) {
 
         {session && (
           <>
-            <ProblemBrief
-              mode={session.mode}
-              account={training.account}
-              scenario={training.scenario}
-              template={training.template}
-            />
-            {training.debrief && (
-              <View className="gap-4">
-                <SectionHeading eyebrow="Debrief" title="How you did" />
-                <DebriefCard debrief={training.debrief} />
-              </View>
-            )}
+            <ScrollView
+              accessibilityLabel={training.debrief ? "Debrief and job details" : "Job details"}
+              nestedScrollEnabled
+              keyboardShouldPersistTaps="handled"
+              contentContainerClassName="gap-4 pb-2"
+              style={{ maxHeight: "30%", flexGrow: 0, flexShrink: 0 }}
+            >
+              {training.debrief && (
+                <View className="gap-4">
+                  <SectionHeading eyebrow="Debrief" title="How you did" />
+                  <DebriefCard debrief={training.debrief} />
+                </View>
+              )}
+              <ProblemBrief
+                mode={session.mode}
+                account={training.account}
+                scenario={training.scenario}
+                template={training.template}
+              />
+            </ScrollView>
             <CoachChat
               mode={session.mode}
               messages={training.messages}
@@ -73,7 +74,7 @@ export function ProblemView({ sessionId }: { sessionId: string }) {
             />
           </>
         )}
-      </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { View } from "react-native";
+import { useRef, useState } from "react";
+import { ScrollView, View } from "react-native";
 import type { ChatMessage, SessionMode } from "@electrical-hero/shared";
 import { PASS_MESSAGE, messageSpeaker } from "@electrical-hero/core/lib/training";
 import { Button } from "@electrical-hero/core/shared/button";
@@ -36,6 +36,8 @@ export function CoachChat({
 }: CoachChatProps) {
   const [draft, setDraft] = useState("");
   const [hint, setHint] = useState<string | null>(null);
+  const conversationRef = useRef<ScrollView>(null);
+  const followReplyRef = useRef(true);
   const isStreaming = streamingReply !== null;
   const isBusy = isStreaming || isGrading;
   const streaming =
@@ -46,6 +48,7 @@ export function CoachChat({
       setHint("Write what you do, or pass this question.");
       return;
     }
+    followReplyRef.current = true;
     setHint(null);
     if (fromDraft) setDraft("");
     const ok = await onSend(content);
@@ -56,42 +59,67 @@ export function CoachChat({
   const error = hint ?? sendError ?? gradeError;
 
   return (
-    <View className="gap-4">
-      <View className="gap-1">
+    <View className="min-h-0 min-w-0 flex-1 overflow-hidden rounded border border-border bg-surface-200">
+      <View className="shrink-0 gap-1 border-b border-border p-4">
         <Text variant="eyebrow" className="text-ink-muted">
           {mode === "scenario" ? "Work the call" : "Ask the account lead"}
         </Text>
         <Text variant="heading">{mode === "scenario" ? "On the job" : "Site briefing"}</Text>
       </View>
 
-      {messages.length === 0 && !isStreaming && (
-        <Text className="text-ink-muted">
-          Start with what you want to know, like “Where do I isolate the main panel?” or “What hazards are on this
-          site?”
-        </Text>
-      )}
-
-      <View accessibilityLiveRegion="polite" className="gap-3">
-        {messages.map((message) => {
-          const { label, text } = messageSpeaker(message, mode);
-          return (
-            <ChatBubble key={message.id} from={message.role === "user" ? "learner" : "tutor"} label={label}>
-              {message.role === "user" ? <Text>{text}</Text> : <Markdown content={text} />}
-            </ChatBubble>
-          );
-        })}
-        {isStreaming && (
-          <ChatBubble
-            from="tutor"
-            label={streaming ? streaming.label : mode === "scenario" ? "Dispatch" : "Account lead"}
-          >
-            {streaming ? <Markdown content={streaming.text} /> : <StatusBadge status="pending" label="Thinking" />}
-          </ChatBubble>
+      <ScrollView
+        ref={conversationRef}
+        accessibilityLabel="Conversation"
+        className="min-h-0 flex-1"
+        contentContainerClassName="p-4"
+        nestedScrollEnabled
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        scrollEventThrottle={16}
+        onScroll={({ nativeEvent: { contentSize, contentOffset, layoutMeasurement } }) => {
+          followReplyRef.current = contentSize.height - contentOffset.y - layoutMeasurement.height < 48;
+        }}
+        onContentSizeChange={() => {
+          if (followReplyRef.current) conversationRef.current?.scrollToEnd({ animated: false });
+        }}
+        onLayout={() => {
+          if (followReplyRef.current) conversationRef.current?.scrollToEnd({ animated: false });
+        }}
+      >
+        {messages.length === 0 && !isStreaming && (
+          <Text className="text-ink-muted">
+            Start with what you want to know, like “Where do I isolate the main panel?” or “What hazards are on this
+            site?”
+          </Text>
         )}
-      </View>
+        <View accessibilityLiveRegion="polite" className="min-w-0 gap-3">
+          {messages.map((message) => {
+            const { label, text } = messageSpeaker(message, mode);
+            return (
+              <ChatBubble key={message.id} from={message.role === "user" ? "learner" : "tutor"} label={label}>
+                {message.role === "user" ? <Text>{text}</Text> : <Markdown content={text} />}
+              </ChatBubble>
+            );
+          })}
+          {isStreaming && (
+            <ChatBubble
+              from="tutor"
+              label={streaming ? streaming.label : mode === "scenario" ? "Dispatch" : "Account lead"}
+            >
+              {streaming ? <Markdown content={streaming.text} /> : <StatusBadge status="pending" label="Thinking" />}
+            </ChatBubble>
+          )}
+        </View>
+      </ScrollView>
 
       {!isCompleted && (
-        <View className="gap-3">
+        <ScrollView
+          className="border-t border-border"
+          contentContainerClassName="gap-3 p-4"
+          style={{ maxHeight: "65%", flexGrow: 0, flexShrink: 0 }}
+          nestedScrollEnabled
+          keyboardShouldPersistTaps="handled"
+        >
           <TextArea
             label={mode === "scenario" ? "What do you do?" : "Your question"}
             value={draft}
@@ -107,7 +135,6 @@ export function CoachChat({
           {error && (
             <View accessibilityRole="alert">
               <Text variant="small" className="text-line-red">
-                {" "}
                 {error}
               </Text>
             </View>
@@ -128,7 +155,7 @@ export function CoachChat({
             disabled={!canFinish || isGrading}
             onPress={onFinish}
           />
-        </View>
+        </ScrollView>
       )}
     </View>
   );

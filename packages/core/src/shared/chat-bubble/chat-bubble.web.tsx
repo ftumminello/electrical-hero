@@ -10,8 +10,8 @@ export const ChatBubble = ({ from, label, meta, className, children }: ChatBubbl
   const Icon = ICON[from];
 
   return (
-    <li className={cn(BUBBLE_ROW[from], className)}>
-      <div className={cn(BUBBLE[from], "flex flex-col")}>
+    <li className={cn(BUBBLE_ROW[from], "min-w-0", className)}>
+      <div className={cn(BUBBLE[from], "flex min-w-0 flex-col [overflow-wrap:anywhere]")}>
         <div className={cn(BUBBLE_HEADER, "flex")}>
           <Icon aria-hidden size={14} strokeWidth={2} className="text-steel" />
           <Text as="span" variant="eyebrow" className={BUBBLE_LABEL}>
