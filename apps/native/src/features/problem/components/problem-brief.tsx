@@ -25,12 +25,12 @@ export function ProblemBrief({ mode, account, scenario, template }: ProblemBrief
   const title = scenario?.title ?? (account ? `Site briefing: ${account.name}` : "Site briefing");
 
   return (
-    <View className="gap-6">
+    <View className="min-w-0 gap-6">
       <View className="gap-3">
         {account && (
           <View className="flex-row items-center gap-2">
             <MapPin size={16} strokeWidth={2} color={colors["ink-muted"]} />
-            <Text variant="eyebrow" className="text-ink-muted">
+            <Text variant="eyebrow" className="min-w-0 flex-1 text-ink-muted">
               {account.name}
             </Text>
           </View>
@@ -97,7 +97,9 @@ export function ProblemBrief({ mode, account, scenario, template }: ProblemBrief
             onPress={() => setShowSiteFile((open) => !open)}
             className="min-h-11 flex-row items-center justify-between gap-2 px-4 py-3"
           >
-            <Text variant="label">Site file: equipment, panels and safety notes</Text>
+            <Text variant="label" className="min-w-0 flex-1">
+              Site file: equipment, panels and safety notes
+            </Text>
             {showSiteFile ? (
               <ChevronDown size={16} strokeWidth={2} color={colors.steel} />
             ) : (

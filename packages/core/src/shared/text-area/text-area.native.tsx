@@ -21,13 +21,14 @@ export const TextArea = ({
   const { colors } = useTheme();
 
   return (
-    <View className={cn(FIELD, className)}>
+    <View className={cn(FIELD, "min-w-0", className)}>
       <Text variant="label" className={FIELD_LABEL}>
         {label}
       </Text>
       <View className={FIELD_BOX}>
         <TextInput
           multiline
+          scrollEnabled
           accessibilityLabel={label}
           accessibilityHint={hint}
           value={value}
@@ -36,7 +37,7 @@ export const TextArea = ({
           placeholderTextColor={colors["ink-muted"]}
           onChangeText={onChangeText}
           textAlignVertical="top"
-          style={{ minHeight: rows * LINE_HEIGHT }}
+          style={{ height: Math.max(96, rows * LINE_HEIGHT + 24) }}
           className={cn(FIELD_INPUT, disabled && "opacity-50")}
         />
         {accessory && <View className={FIELD_ACCESSORY}>{accessory}</View>}

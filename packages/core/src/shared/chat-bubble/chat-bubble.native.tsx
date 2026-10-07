@@ -13,11 +13,11 @@ export const ChatBubble = ({ from, label, meta, className, children }: ChatBubbl
   const Icon = ICON[from];
 
   return (
-    <View className={cn(BUBBLE_ROW[from], className)}>
-      <View className={BUBBLE[from]}>
+    <View className={cn(BUBBLE_ROW[from], "min-w-0", className)}>
+      <View className={cn(BUBBLE[from], "min-w-0 shrink")}>
         <View className={BUBBLE_HEADER}>
           <Icon size={14} strokeWidth={2} color={colors.steel} />
-          <Text variant="eyebrow" className={BUBBLE_LABEL}>
+          <Text variant="eyebrow" className={cn(BUBBLE_LABEL, "min-w-0 shrink")}>
             {label}
           </Text>
           {meta}

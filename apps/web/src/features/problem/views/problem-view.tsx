@@ -20,8 +20,13 @@ export function ProblemView({ sessionId }: { sessionId: string }) {
       {training.loadError && !session && <ErrorState message={training.loadError} onRetry={training.reload} />}
 
       {session && (
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start">
-          <div className="lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
+        <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start">
+          <div
+            role="region"
+            aria-labelledby="problem-title"
+            tabIndex={0}
+            className="max-h-[36rem] min-w-0 overflow-y-auto overscroll-contain pr-2 [scrollbar-gutter:stable] lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)]"
+          >
             <ProblemBrief
               mode={session.mode}
               account={training.account}
@@ -29,12 +34,19 @@ export function ProblemView({ sessionId }: { sessionId: string }) {
               template={training.template}
             />
           </div>
-          <div className="flex flex-col gap-8">
+          <div className="flex min-w-0 flex-col gap-8">
             {training.debrief && (
-              <section aria-labelledby="debrief-heading" className="flex flex-col gap-4">
+              <section aria-labelledby="debrief-heading" className="flex min-w-0 flex-col gap-4">
                 <SectionHeading id="debrief-heading" eyebrow="Debrief" title="How you did" />
                 <TextLink href="/">Start the next problem</TextLink>
-                <DebriefCard debrief={training.debrief} />
+                <div
+                  role="region"
+                  aria-labelledby="debrief-heading"
+                  tabIndex={0}
+                  className="max-h-[36rem] overflow-y-auto overscroll-contain [scrollbar-gutter:stable]"
+                >
+                  <DebriefCard debrief={training.debrief} />
+                </div>
               </section>
             )}
             <CoachChat

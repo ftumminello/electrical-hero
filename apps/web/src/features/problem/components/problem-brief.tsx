@@ -20,7 +20,7 @@ export function ProblemBrief({ mode, account, scenario, template }: ProblemBrief
   const title = scenario?.title ?? (account ? `Site briefing: ${account.name}` : "Site briefing");
 
   return (
-    <section aria-labelledby="problem-title" className="flex flex-col gap-6">
+    <section aria-labelledby="problem-title" className="flex min-w-0 flex-col gap-6 [overflow-wrap:anywhere]">
       <div className="flex flex-col gap-3">
         {account && (
           <p className="flex flex-row items-center gap-2 text-ink-muted type-eyebrow">
@@ -100,7 +100,7 @@ export function ProblemBrief({ mode, account, scenario, template }: ProblemBrief
           </summary>
           <div className="flex flex-col gap-4 border-t border-border p-4">
             {account.siteContact.name && (
-              <p className="flex flex-row items-center gap-2 text-ink type-small">
+              <p className="flex min-w-0 flex-row flex-wrap items-center gap-2 text-ink type-small">
                 <Phone aria-hidden size={14} strokeWidth={2} className="shrink-0 text-steel" />
                 {account.siteContact.name}
                 {account.siteContact.phone && <Text variant="spec">{account.siteContact.phone}</Text>}
