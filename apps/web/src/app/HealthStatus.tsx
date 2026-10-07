@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
-import { APP_NAME, type HealthResponse } from "@electrical-hero/shared";
+"use client";
 
-export function App() {
+import { useEffect, useState } from "react";
+import type { HealthResponse } from "@electrical-hero/shared";
+
+export function HealthStatus() {
   const [health, setHealth] = useState<string>("checking...");
 
   useEffect(() => {
@@ -11,10 +13,5 @@ export function App() {
       .catch(() => setHealth("server unreachable"));
   }, []);
 
-  return (
-    <main>
-      <h1>{APP_NAME}</h1>
-      <p>Server: {health}</p>
-    </main>
-  );
+  return <p>Server: {health}</p>;
 }
