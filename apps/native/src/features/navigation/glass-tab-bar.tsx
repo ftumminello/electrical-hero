@@ -84,7 +84,12 @@ export function GlassTabBar({ state, descriptors, navigation }: BottomTabBarProp
     stretch.value = withSequence(withTiming(1.18, { duration: 120 }), withSpring(1, { damping: 10, stiffness: 180 }));
   }, [state.index, tabWidth, x, stretch]);
 
+  // All bubble layout lives in the animated style: static styles passed alongside it on Animated.View get dropped here.
   const bubbleStyle = useAnimatedStyle(() => ({
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
     width: tabWidth,
     transform: [{ translateX: x.value }, { scaleX: stretch.value }, { scaleY: 2 - stretch.value }],
   }));
@@ -96,9 +101,11 @@ export function GlassTabBar({ state, descriptors, navigation }: BottomTabBarProp
       <View onLayout={onLayout} style={styles.bar}>
         <GlassSurface style={[StyleSheet.absoluteFill, styles.pill]} />
         {tabWidth > 0 && (
-          <Animated.View pointerEvents="none" style={[styles.bubble, bubbleStyle]}>
-            <GlassSurface style={[StyleSheet.absoluteFill, styles.pill]} interactive tint={colors["surface-300"]} />
-          </Animated.View>
+          <View pointerEvents="none" style={styles.bubbleTrack}>
+            <Animated.View style={bubbleStyle}>
+              <GlassSurface style={[StyleSheet.absoluteFill, styles.pill]} interactive tint={colors["surface-300"]} />
+            </Animated.View>
+          </View>
         )}
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
@@ -151,7 +158,7 @@ const styles = StyleSheet.create({
     elevation: 12,
   },
   pill: { borderRadius: 999 },
-  bubble: { position: "absolute", top: BAR_PADDING, bottom: BAR_PADDING, left: BAR_PADDING },
+  bubbleTrack: { position: "absolute", top: BAR_PADDING, bottom: BAR_PADDING, left: BAR_PADDING, right: BAR_PADDING },
   tab: { flex: 1, alignItems: "center", justifyContent: "center", gap: 2 },
   label: { fontFamily: "Inter_600SemiBold", fontSize: 11 },
 });
