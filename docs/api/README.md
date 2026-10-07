@@ -2,6 +2,7 @@
 
 - **Spec:** [`openapi.yaml`](./openapi.yaml) (OpenAPI 3.1). Import it into Postman, Insomnia or Swagger UI, or generate a client from it.
 - **Types:** `import type { … } from "@electrical-hero/shared"`. These are the same shapes the server returns.
+- **Safety protocols and electrical code:** see [`safety-and-code.md`](./safety-and-code.md).
 - **Base URL:** `https://electrical-hero-api.electrical-hero.workers.dev`
   - Next.js dev (`apps/web`): call `/api/...`, which `next.config.ts` rewrites to `http://localhost:3000`.
   - Expo: set `EXPO_PUBLIC_API_URL` to the deployed URL. Local `wrangler dev` has empty storage.
@@ -16,7 +17,11 @@
 | GET | `/accounts/:accountId` | `AccountDetail` | Includes `criticalInfo` and the full site file `configMarkdown` |
 | GET | `/accounts/:accountId/scenarios` | `ScenarioPublic[]` | Previously generated, newest first |
 | GET | `/rules` | `CompanyRules` | Contractor rulebook (Markdown; rule ids like `R-LOTO-01`) |
-| GET | `/scenario-templates?accountId=` | `ScenarioTemplateSummary[]` | Pass `accountId` to get only templates that site qualifies for |
+| GET | `/scenario-templates?accountId=` | `ScenarioTemplateSummary[]` | Pass `accountId` to get only templates that site qualifies for; each lists its `protocols` |
+| GET | `/accounts/:accountId/safety-protocols` | `SafetyProtocolSummary[]` | Protocols that apply at this site ([guide](./safety-and-code.md)) |
+| GET | `/safety-protocols` · `/safety-protocols/:id` | `SafetyProtocolSummary[]` · `SafetyProtocol` | The protocol library; one protocol with its Markdown |
+| GET | `/accounts/:accountId/code-specs` · `/code-specs/:jurisdictionId` | `CodeSpec` | The electrical code in force where the site is (404 if not written yet) |
+| GET | `/regulations/cfr/29/:section` | `Regulation` | Live OSHA text from eCFR, e.g. `1910.333`; parts 1910 and 1926 only |
 | POST | `/scenarios` | `ScenarioPublic` (201) | **AI, ~10–40 s.** Body `{ accountId, templateId? }` |
 | GET | `/scenarios/:scenarioId` | `ScenarioPublic` | |
 | POST | `/sessions` | `SessionDetail` (201) | Body `{ accountId, scenarioId?, traineeName }`. No `scenarioId` starts a briefing chat |

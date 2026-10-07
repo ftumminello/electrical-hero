@@ -48,6 +48,10 @@ tags:
     description: AI-generated training scenarios for a specific site.
   - name: Sessions
     description: Training conversations (briefing or scenario), streamed replies and debriefs.
+  - name: Safety protocols
+    description: The contractor's task-level safety procedures (see docs/api/safety-and-code.md).
+  - name: Electrical code
+    description: Local code specs per jurisdiction, and live OSHA regulation text from eCFR.
 
 paths:
   /health:
@@ -175,6 +179,7 @@ paths:
                   requires: [tenant-panels]
                   skills: [load-calculation, code-compliance, customer-communication]
                   rules: [R-LOAD-01, R-LABEL-01, R-CUST-01]
+                  protocols: [sp-loto, sp-arc-flash-ppe]
         "404":
           description: "`accountId` was given but no such account exists."
           content:
@@ -399,6 +404,142 @@ paths:
         "500": { $ref: "#/components/responses/ServerError" }
         "502": { $ref: "#/components/responses/AiFailure" }
 
+  /accounts/{accountId}/safety-protocols:
+    get:
+      tags: [Accounts, Safety protocols]
+      operationId: listAccountSafetyProtocols
+      summary: Safety protocols that apply at a site
+      description: Protocols whose `appliesTo` features the account has (an empty `appliesTo` applies everywhere). Sorted by id.
+      parameters:
+        - $ref: "#/components/parameters/accountId"
+      responses:
+        "200":
+          description: Applicable protocol summaries.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SafetyProtocolSummary" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /accounts/{accountId}/code-specs:
+    get:
+      tags: [Accounts, Electrical code]
+      operationId: getAccountCodeSpec
+      summary: The electrical code spec for a site's jurisdiction
+      description: Jurisdiction is derived from the site's state (`WA` becomes `us-wa`). Returns 404 when no spec has been written for that jurisdiction yet.
+      parameters:
+        - $ref: "#/components/parameters/accountId"
+      responses:
+        "200":
+          description: The code spec.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CodeSpec" }
+        "404":
+          description: Unknown account, or no code spec for its jurisdiction yet.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+              example: { error: no code spec has been written for us-or yet }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /safety-protocols:
+    get:
+      tags: [Safety protocols]
+      operationId: listSafetyProtocols
+      summary: The contractor's safety protocol library
+      responses:
+        "200":
+          description: All protocol summaries, sorted by id.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SafetyProtocolSummary" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /safety-protocols/{protocolId}:
+    get:
+      tags: [Safety protocols]
+      operationId: getSafetyProtocol
+      summary: One safety protocol with its full procedure
+      parameters:
+        - name: protocolId
+          in: path
+          required: true
+          schema: { type: string, pattern: "^[a-z0-9-]+$" }
+          example: sp-loto
+      responses:
+        "200":
+          description: The protocol.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SafetyProtocol" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /code-specs/{jurisdictionId}:
+    get:
+      tags: [Electrical code]
+      operationId: getCodeSpec
+      summary: A jurisdiction's electrical code spec
+      parameters:
+        - name: jurisdictionId
+          in: path
+          required: true
+          schema: { type: string, pattern: "^[a-z0-9-]+$" }
+          example: us-wa
+      responses:
+        "200":
+          description: The code spec.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CodeSpec" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /regulations/cfr/29/{section}:
+    get:
+      tags: [Electrical code]
+      operationId: getRegulation
+      summary: Live OSHA regulation text from eCFR
+      description: |
+        Fetches a 29 CFR section from the official eCFR API (public-domain text) and caches it for 24 hours.
+        Only OSHA general industry (part 1910) and construction (part 1926) sections are accepted.
+        The first fetch of a section can take a few seconds.
+      parameters:
+        - name: section
+          in: path
+          required: true
+          schema: { type: string, pattern: "^(1910|1926)\\.\\d{1,4}$" }
+          example: "1910.333"
+      responses:
+        "200":
+          description: The section text.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Regulation" }
+              example:
+                section: "1910.333"
+                heading: § 1910.333 Selection and use of work practices.
+                text: "(a) General. Safety-related work practices shall be employed to prevent electric shock or other injuries resulting from either direct or indirect electrical contacts, when work is performed near or on equipment or circuits which are or may be energized. …"
+                sourceUrl: https://www.ecfr.gov/current/title-29/section-1910.333
+                asOf: "2026-10-06"
+        "400":
+          description: Not an OSHA part 1910 or 1926 section.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+              example: { error: "section must be an OSHA 29 CFR part 1910 or 1926 section, like 1910.333 or 1926.417" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "502":
+          description: eCFR is unreachable or returned an error. Link users to the eCFR site instead.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+
 components:
   parameters:
     accountId:
@@ -504,7 +645,7 @@ components:
 
     ScenarioTemplateSummary:
       type: object
-      required: [id, title, difficulty, requires, skills, rules]
+      required: [id, title, difficulty, requires, skills, rules, protocols]
       properties:
         id: { type: string, example: tmpl-partial-power-loss }
         title: { type: string }
@@ -518,6 +659,10 @@ components:
           type: array
           items: { type: string }
           description: Company rule ids this template stresses.
+        protocols:
+          type: array
+          items: { type: string }
+          description: Safety protocol ids this scenario type exercises (see /safety-protocols/{protocolId}).
 
     CreateScenarioRequest:
       type: object
@@ -664,3 +809,57 @@ components:
       required: [error]
       properties:
         error: { type: string }
+
+    SafetyProtocolSummary:
+      type: object
+      required: [id, title, category, appliesTo, rules, osha, nfpa70e]
+      properties:
+        id: { type: string, example: sp-loto }
+        title: { type: string, example: Lockout/tagout and verifying absence of voltage }
+        category: { type: string, example: isolation }
+        appliesTo:
+          type: array
+          items: { type: string }
+          description: "Account features a site must have; empty = applies everywhere."
+        rules:
+          type: array
+          items: { type: string }
+          description: "Company rule ids, e.g. R-LOTO-01."
+        osha:
+          type: array
+          items: { type: string }
+          description: "29 CFR sections; fetch the text from /regulations/cfr/29/{section}."
+        nfpa70e:
+          type: array
+          items: { type: string }
+          description: "NFPA 70E article references (cited, never quoted)."
+
+    SafetyProtocol:
+      allOf:
+        - $ref: "#/components/schemas/SafetyProtocolSummary"
+        - type: object
+          required: [markdown]
+          properties:
+            markdown: { type: string, description: "The procedure: When this applies, Hazards, PPE & tools, Procedure, Verification, Stop-work triggers, Records." }
+
+    CodeSpec:
+      type: object
+      required: [id, name, necEdition, nextEdition, authority, amendments, markdown]
+      properties:
+        id: { type: string, example: us-wa }
+        name: { type: string, example: Washington State }
+        necEdition: { type: string, description: "NEC edition in force today.", example: 2023 NEC (NFPA 70-2023) }
+        nextEdition: { type: [string, "null"], description: "Upcoming edition and its effective date, if adopted.", example: "2026 NEC, effective 2026-12-31" }
+        authority: { type: string, description: "Who permits and inspects electrical work." }
+        amendments: { type: string, description: "The state's amendment rules.", example: WAC 296-46B }
+        markdown: { type: string, description: "Adopted codes, authority, licensing, state amendments, workplace safety rules, sources (paraphrased; NEC never quoted)." }
+
+    Regulation:
+      type: object
+      required: [section, heading, text, sourceUrl, asOf]
+      properties:
+        section: { type: string, example: "1910.333" }
+        heading: { type: string }
+        text: { type: string, description: "Plain text; paragraphs separated by a blank line." }
+        sourceUrl: { type: string, format: uri, description: "The official eCFR page for the section." }
+        asOf: { type: string, format: date, description: "eCFR's up-to-date-as-of date for title 29." }
