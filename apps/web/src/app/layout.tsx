@@ -4,6 +4,7 @@ import { Barlow_Condensed, Inter, JetBrains_Mono } from "next/font/google";
 import { APP_NAME } from "@electrical-hero/shared";
 import { ThemeProvider } from "@electrical-hero/core/providers/theme-provider";
 import { ThemeScript } from "@electrical-hero/core/providers/theme-script";
+import { AppHeader } from "@/features/shell/components/app-header";
 import "./globals.css";
 
 // Variable names match the `type-*` utilities in the design-system preset.
@@ -24,7 +25,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <ThemeScript />
       </head>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <AppHeader />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

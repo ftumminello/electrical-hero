@@ -4,3 +4,5 @@ export interface HealthResponse {
   status: "ok";
   app: string;
 }
+
+export * from "./domain";
