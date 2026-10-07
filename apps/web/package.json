@@ -7,12 +7,15 @@
     "dev": "next dev -p 5173",
     "build": "next build",
     "start": "next start -p 5173",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@electrical-hero/core": "workspace:*",
     "@electrical-hero/design-system": "workspace:*",
     "@electrical-hero/shared": "workspace:*",
+    "@opennextjs/cloudflare": "^1.20.9",
     "lucide-react": "^1.52.0",
     "next": "^16.4.0",
     "react": "^19.3.0",
@@ -25,6 +28,7 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "postcss": "^8.5.29",
     "tailwindcss": "^3.4.19",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "wrangler": "^4.148.0"
   }
 }

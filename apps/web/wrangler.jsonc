@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "electrical-hero-web",
+  "main": ".open-next/worker.js",
+  "account_id": "f829b338b404de5d62877eed272edc9d",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "observability": { "enabled": true },
+  // Keep the *.workers.dev URL alongside the custom domains (wrangler turns it off when routes are set).
+  "workers_dev": true,
+  // Workers custom domains: Cloudflare creates the DNS records and certificates on deploy.
+  "routes": [
+    { "pattern": "electrical-hero.com", "custom_domain": true },
+    { "pattern": "www.electrical-hero.com", "custom_domain": true }
+  ],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "electrical-hero-web" }]
+}
